@@ -591,7 +591,16 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function elId(i){return document.getElementById(i);}
 function trLower(s){return String(s).replace(/İ/g,'i').replace(/I/g,'ı').toLocaleLowerCase('tr');}
-function slug(s){return trLower(String(s)).replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');}
+/* Kayıt anahtarı üretir. Türkçe harfler ASCII karşılıklarına çevrilir; aksi
+   halde "FIAT" → "f_at", "Aslı Barışkan" → "asl_bar_kan" gibi harf düşen
+   anahtarlar oluşuyordu. Anahtarlar yalnızca veritabanı kimliğinde kullanılır,
+   ekranda görünen adlar bundan etkilenmez. */
+var TR_ASCII={'ç':'c','Ç':'c','ğ':'g','Ğ':'g','ı':'i','I':'i','İ':'i',
+              'ö':'o','Ö':'o','ş':'s','Ş':'s','ü':'u','Ü':'u','â':'a','Â':'a','î':'i','û':'u'};
+function slug(s){
+  return String(s).replace(/[çÇğĞıIİöÖşŞüÜâÂîû]/g,function(c){return TR_ASCII[c];})
+    .toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+}
 function fmtSayi(n){
   if(n==null||n==='')return '—';
   var x=Number(n); if(!isFinite(x))return '—';
