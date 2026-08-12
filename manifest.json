@@ -1,0 +1,16 @@
+{
+  "name": "İnciroğlu Otomotiv — Servis Danışmanı Performans Panosu",
+  "short_name": "Servis Panosu",
+  "description": "Servis danışmanı hedef tebliğ, aylık performans karnesi ve geri bildirim süreci yönetimi.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#16324e",
+  "theme_color": "#16324e",
+  "lang": "tr-TR",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

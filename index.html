@@ -1,0 +1,2205 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>İnciroğlu Otomotiv · Servis Danışmanı Performans Panosu</title>
+<meta name="description" content="Servis danışmanı hedef tebliğ, aylık performans karnesi ve geri bildirim süreci yönetimi.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16324e">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --brand:#16324e; --brand-2:#1f456b; --accent:#c9a227; --accent-2:#e0be4f;
+  --page:#eef1f4; --surface:#ffffff; --surface-2:#f7f8fa;
+  --ink:#0e1b28; --ink-2:#52514e; --muted:#8a8f96; --grid:#e6e8ec; --line:#cfd4da;
+  --ok:#0ca30c; --warn:#e8930c; --bad:#d03b3b; --info:#2a78d6;
+  --radius:12px; --shadow:0 1px 3px rgba(16,27,40,.08),0 8px 24px rgba(16,27,40,.06);
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Source Serif 4","Source Serif Pro",Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--page);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.hidden{display:none !important}
+button{font-family:inherit}
+input,select,textarea{font-family:inherit;font-size:14px}
+
+/* ---------- GİRİŞ ---------- */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(135deg,#0f2438 0%,#16324e 45%,#1f456b 100%)}
+.login-card{width:100%;max-width:420px;background:var(--surface);border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}
+.login-top{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);
+  padding:26px 28px 22px;color:#fff;position:relative}
+.login-top:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
+  background:linear-gradient(90deg,var(--accent) 0%,var(--accent-2) 50%,var(--accent) 100%)}
+.login-top img{height:38px;margin-bottom:14px;filter:brightness(0) invert(1);opacity:.95}
+.login-top h1{font-family:var(--serif);font-size:19px;font-weight:600;margin:0 0 4px;letter-spacing:.01em}
+.login-top p{margin:0;font-size:12.5px;opacity:.75;letter-spacing:.02em}
+.login-body{padding:26px 28px 28px}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:11.5px;font-weight:600;color:var(--ink-2);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.fld input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;
+  background:var(--surface-2);transition:border-color .15s,box-shadow .15s}
+.fld input:focus{outline:none;border-color:var(--brand-2);background:#fff;
+  box-shadow:0 0 0 3px rgba(31,69,107,.12)}
+.btn-primary{width:100%;padding:12px;border:0;border-radius:9px;cursor:pointer;
+  background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);color:#fff;
+  font-size:14px;font-weight:600;letter-spacing:.03em;transition:transform .12s,box-shadow .15s}
+.btn-primary:hover{box-shadow:0 6px 18px rgba(22,50,78,.3)}
+.btn-primary:active{transform:translateY(1px)}
+.login-err{color:var(--bad);font-size:12.5px;margin-top:10px;min-height:17px;text-align:center}
+.login-foot{margin-top:18px;padding-top:16px;border-top:1px solid var(--grid);
+  font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6}
+
+/* ---------- KABUK ---------- */
+#app{min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);color:#fff;
+  padding:0 20px;position:sticky;top:0;z-index:40;box-shadow:0 2px 12px rgba(16,27,40,.18)}
+.topbar-in{display:flex;align-items:center;gap:16px;height:58px;max-width:1560px;margin:0 auto}
+.topbar img{height:26px;filter:brightness(0) invert(1);opacity:.95}
+.tb-title{font-family:var(--serif);font-size:15.5px;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+.tb-sub{font-size:11.5px;opacity:.7;letter-spacing:.03em;margin-left:-8px}
+.tb-spacer{flex:1}
+.tb-who{display:flex;flex-direction:column;align-items:flex-end;line-height:1.25}
+.tb-who b{font-size:13px;font-weight:600}
+.tb-who span{font-size:10.5px;opacity:.72;letter-spacing:.07em;text-transform:uppercase}
+.tb-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;
+  padding:7px 13px;border-radius:8px;cursor:pointer;font-size:12.5px;transition:background .15s}
+.tb-btn:hover{background:rgba(255,255,255,.22)}
+.tabs{background:var(--surface);border-bottom:1px solid var(--line);padding:0 20px;
+  position:sticky;top:58px;z-index:39;overflow-x:auto;scrollbar-width:thin}
+.tabs-in{display:flex;gap:2px;max-width:1560px;margin:0 auto}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:13px 17px;cursor:pointer;
+  font-size:13.5px;font-weight:500;color:var(--ink-2);white-space:nowrap;transition:color .15s,border-color .15s}
+.tab:hover{color:var(--brand)}
+.tab.on{color:var(--brand);border-bottom-color:var(--accent);font-weight:600}
+main{flex:1;padding:22px 20px 60px}
+.wrap{max-width:1560px;margin:0 auto}
+.view{opacity:1;transition:opacity .12s}
+.view.fading{opacity:0}
+
+/* ---------- KARTLAR ---------- */
+.card{background:var(--surface);border:1px solid var(--grid);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+.card-h{padding:15px 18px;border-bottom:1px solid var(--grid);display:flex;align-items:center;
+  gap:12px;flex-wrap:wrap;background:linear-gradient(180deg,#fff 0%,var(--surface-2) 100%)}
+.card-h h3{font-family:var(--serif);font-size:15px;font-weight:600;margin:0;letter-spacing:.01em}
+.card-h .sub{font-size:12px;color:var(--muted)}
+.card-b{padding:18px}
+.card-b.tight{padding:0}
+
+/* ---------- ADIM ÇUBUĞU ---------- */
+.steps{display:flex;gap:0;margin-bottom:20px;background:var(--surface);border:1px solid var(--grid);
+  border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.step{flex:1;padding:13px 16px;display:flex;align-items:center;gap:11px;position:relative;
+  border-right:1px solid var(--grid)}
+.step:last-child{border-right:0}
+.step-n{width:27px;height:27px;border-radius:50%;background:var(--grid);color:var(--ink-2);
+  display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;flex:0 0 auto}
+.step.on .step-n{background:var(--brand);color:#fff}
+.step.done .step-n{background:var(--ok);color:#fff}
+.step-t{line-height:1.25}
+.step-t b{display:block;font-size:12.5px;font-weight:600}
+.step-t span{font-size:11px;color:var(--muted)}
+.step.on{background:linear-gradient(180deg,rgba(201,162,39,.07) 0%,transparent 100%)}
+.step.on:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--accent)}
+
+/* ---------- FORM ELEMANLARI ---------- */
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:5px}
+.f label{font-size:11px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.05em}
+.f select,.f input{padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;
+  min-width:150px;transition:border-color .15s,box-shadow .15s}
+.f select:focus,.f input:focus{outline:none;border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(31,69,107,.1)}
+.btn{padding:9px 15px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;
+  font-size:13px;font-weight:500;color:var(--ink);transition:all .15s;white-space:nowrap}
+.btn:hover{border-color:var(--brand-2);color:var(--brand)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.dark{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);color:#fff;border-color:transparent;font-weight:600}
+.btn.dark:hover{color:#fff;box-shadow:0 5px 16px rgba(22,50,78,.28)}
+.btn.gold{background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);color:#3d2f00;border-color:transparent;font-weight:600}
+.btn.gold:hover{color:#3d2f00;box-shadow:0 5px 16px rgba(201,162,39,.35)}
+.btn.danger{color:var(--bad);border-color:#e8b4b4}
+.btn.danger:hover{background:#fdf3f3;border-color:var(--bad);color:var(--bad)}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:6px;border:1px solid var(--line);
+  background:#fff;cursor:pointer;transition:all .15s}
+.btn-sm:hover{border-color:var(--brand-2);color:var(--brand)}
+
+/* ---------- TABLO ---------- */
+.tbl-wrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th{background:var(--surface-2);text-align:left;padding:10px 12px;font-size:11px;
+  font-weight:700;color:var(--ink-2);text-transform:uppercase;letter-spacing:.05em;
+  border-bottom:2px solid var(--grid);white-space:nowrap;position:sticky;top:0;z-index:2}
+table.tbl td{padding:8px 12px;border-bottom:1px solid var(--grid);vertical-align:middle}
+table.tbl tr:last-child td{border-bottom:0}
+table.tbl tbody tr:hover{background:var(--surface-2)}
+table.tbl td.num,table.tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
+.grp-row td{background:linear-gradient(90deg,rgba(22,50,78,.06) 0%,transparent 100%);
+  font-weight:700;font-size:11.5px;color:var(--brand);text-transform:uppercase;letter-spacing:.06em;
+  padding:9px 12px !important}
+.mtr-in{width:100%;max-width:130px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;
+  text-align:right;font-variant-numeric:tabular-nums;background:#fffdf5}
+.mtr-in:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(201,162,39,.15);background:#fff}
+.mtr-in.ro{background:var(--surface-2);color:var(--ink-2)}
+.mtr-sel{padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:12.5px}
+.mtr-ad{font-weight:500}
+.mtr-not{display:block;font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;line-height:1.35}
+.mtr-hedef-info{font-size:10.5px;color:var(--muted);white-space:nowrap}
+
+/* ---------- ROZETLER ---------- */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;
+  letter-spacing:.02em;white-space:nowrap}
+.b-ok{background:#e6f7e6;color:#0a7a0a}
+.b-bad{background:#fdeaea;color:#b52d2d}
+.b-warn{background:#fdf3e0;color:#a86a00}
+.b-info{background:#e8f1fc;color:#1f5da8}
+.b-mut{background:#eef0f3;color:#6b7078}
+.b-gold{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#3d2f00}
+
+/* ---------- DURUM/BOŞ ---------- */
+.empty{padding:48px 20px;text-align:center;color:var(--muted);font-size:13.5px}
+.empty b{display:block;font-size:15px;color:var(--ink-2);margin-bottom:6px;font-family:var(--serif)}
+.note{background:#f0f6fd;border-left:3px solid var(--info);padding:11px 14px;border-radius:0 8px 8px 0;
+  font-size:12.5px;color:#1a3a5c;margin-bottom:14px;line-height:1.55}
+.note.warn{background:#fdf6e8;border-left-color:var(--warn);color:#6b4a00}
+.note.bad{background:#fdf0f0;border-left-color:var(--bad);color:#7d2020}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--grid);border-radius:var(--radius);
+  padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--brand)}
+.kpi.ok:before{background:var(--ok)}.kpi.bad:before{background:var(--bad)}.kpi.gold:before{background:var(--accent)}
+.kpi-l{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.kpi-v{font-family:var(--serif);font-size:26px;font-weight:600;line-height:1;letter-spacing:-.01em}
+.kpi-s{font-size:11.5px;color:var(--muted);margin-top:5px}
+
+/* ---------- MODAL ---------- */
+.ov{position:fixed;inset:0;background:rgba(8,16,26,.55);backdrop-filter:blur(3px);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.ov-box{background:var(--surface);border-radius:14px;max-width:560px;width:100%;
+  box-shadow:0 24px 70px rgba(0,0,0,.4);overflow:hidden;max-height:88vh;display:flex;flex-direction:column}
+.ov-h{padding:16px 20px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;
+  font-family:var(--serif);font-size:15px;font-weight:600}
+.ov-h.bad{background:linear-gradient(135deg,#a32828,var(--bad))}
+.ov-b{padding:20px;overflow-y:auto}
+.ov-b p{margin:0 0 12px;font-size:13.5px;line-height:1.6}
+.ov-who{font-size:12.5px;color:var(--muted);padding-bottom:11px;margin-bottom:13px;border-bottom:1px solid var(--grid)}
+.ov-f{padding:14px 20px;border-top:1px solid var(--grid);display:flex;gap:10px;justify-content:flex-end;
+  flex-wrap:wrap;background:var(--surface-2)}
+
+/* ---------- TOAST ---------- */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:200;
+  background:var(--ink);color:#fff;padding:12px 22px;border-radius:10px;font-size:13.5px;
+  box-shadow:0 10px 34px rgba(0,0,0,.35);opacity:0;transition:transform .28s,opacity .28s;pointer-events:none;max-width:88vw}
+#toast.on{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ---------- SENK ---------- */
+.sync{display:flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 11px;border-radius:20px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
+.sync .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px rgba(12,163,12,.8)}
+.sync.off .dot{background:var(--warn);box-shadow:0 0 6px rgba(232,147,12,.8)}
+.sync.err .dot{background:var(--bad);box-shadow:0 0 6px rgba(208,59,59,.8)}
+
+@media(max-width:820px){
+  .topbar-in{height:auto;padding:10px 0;flex-wrap:wrap;gap:10px}
+  .tb-title{font-size:14px}.tb-sub{display:none}
+  main{padding:16px 12px 50px}
+  .steps{flex-direction:column}
+  .step{border-right:0;border-bottom:1px solid var(--grid)}
+  .f select,.f input{min-width:130px}
+}
+@media print{body{background:#fff}.topbar,.tabs,.no-print{display:none !important}}
+</style>
+</head>
+<body>
+
+<!-- ================= GİRİŞ ================= -->
+<div id="login">
+  <div class="login-card">
+    <div class="login-top">
+      <img src="logo.png" alt="İnciroğlu Otomotiv" onerror="this.style.display='none'">
+      <h1>Servis Danışmanı Performans Sistemi</h1>
+      <p>HEDEF TEBLİĞ · AYLIK KARNE · GERİ BİLDİRİM</p>
+    </div>
+    <div class="login-body">
+      <form id="loginForm" autocomplete="off">
+        <div class="fld">
+          <label for="u">Kullanıcı Adı</label>
+          <input id="u" type="text" autocomplete="username" required>
+        </div>
+        <div class="fld">
+          <label for="p">Şifre</label>
+          <input id="p" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn-primary" type="submit">Giriş Yap</button>
+        <div class="login-err" id="loginErr"></div>
+      </form>
+      <div class="login-foot">
+        İNCİROĞLU OTOMOTİV SAN. TİC. A.Ş.<br>
+        İnsan Kaynakları Direktörlüğü · Servis Performans Yönetimi
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= UYGULAMA ================= -->
+<div id="app" class="hidden">
+  <div class="topbar">
+    <div class="topbar-in">
+      <img src="logo.png" alt="" onerror="this.style.display='none'">
+      <div>
+        <div class="tb-title">Servis Danışmanı Performans Panosu</div>
+      </div>
+      <div class="tb-spacer"></div>
+      <div class="sync" id="syncBox" title="Veri eşitleme durumu"><span class="dot"></span><span id="syncTxt">Bağlanıyor…</span></div>
+      <div class="tb-who">
+        <b id="whoAd">—</b>
+        <span id="whoRol">—</span>
+      </div>
+      <button class="tb-btn" id="pwBtn" title="Şifre değiştir">🔑</button>
+      <button class="tb-btn" id="logoutBtn">Çıkış</button>
+    </div>
+  </div>
+  <div class="tabs"><div class="tabs-in" id="tabs"></div></div>
+  <main><div class="wrap"><div class="view" id="view"></div></div></main>
+</div>
+
+<div id="ovRoot"></div>
+<div id="toast"></div>
+
+<script>
+/* ============================================================================
+   İNCİROĞLU OTOMOTİV — SERVİS DANIŞMANI PERFORMANS SİSTEMİ
+   Tek dosya · build adımı yok · Firebase Firestore ile canlı senkron
+
+   AKIŞ (3 adım):
+     1) HEDEF TEBLİĞ  — ayın ilk haftası müdür hedefleri girer, çıktı alınır,
+                        imzalatılır, İK'ya gönderilir.
+     2) KARNE         — ay bittikten sonra tebliğ edilmiş hedefler karşısına
+                        gerçekleşenler yazılır, başarı oranı ve durum çıkar.
+     3) GERİ BİLDİRİM — karnede en az 1 metrik "Yetersiz" ise performans geri
+                        bildirim formu üretilir, imzalatılır, görüş beyanı alınır.
+
+   VERİ: Sabitler aşağıda TANIM_* olarak durur; admin panelinden yapılan
+   değişiklikler Firestore'daki servisVeri/current dokümanına yazılır ve
+   uygulama açılışında bu sabitlerin üzerine biner (bkz. veriUygula).
+   ========================================================================== */
+
+var AYLAR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+
+/* ---------------------------------------------------------------------------
+   MARKALAR ve ROLLER
+   Her marka, birden çok "karne rolü" barındırabilir. BMW'de üç ayrı rol
+   (mekanik / garanti / hasar) tek müdüre — İbrahim Özdemir'e — bağlıdır.
+--------------------------------------------------------------------------- */
+var TANIM_MARKALAR=[
+  {kod:'BMW',            ad:'BMW',              mudur:'İbrahim Özdemir',    aktif:true,
+   roller:['mekanik','garanti','hasar']},
+  {kod:'FIAT',           ad:'Fiat',             mudur:'Fatih Boru',         aktif:true,
+   roller:['mekanik']},
+  {kod:'HONDA',          ad:'Honda',            mudur:'Memet Orhan Çavdar', aktif:true,
+   roller:['mekanik','hasar']},
+  {kod:'PSA',            ad:'PSA',              mudur:'Birol Caner',        aktif:true,
+   roller:['mekanik']},
+  {kod:'OMODA_JAECOO',   ad:'Omoda & Jaecoo',   mudur:'',                   aktif:true,
+   roller:['mekanik']},
+  {kod:'HASAR',          ad:'Hasar (Kaporta-Boya)', mudur:'İbrahim Topçu',  aktif:false,
+   roller:['hasar']}
+];
+
+var ROL_AD={mekanik:'Mekanik Servis Danışmanı',garanti:'Garanti Servis Danışmanı',hasar:'Hasar Servis Danışmanı'};
+
+/* ---------------------------------------------------------------------------
+   METRİK SETLERİ  —  anahtar: "MARKA::rol"
+   Alanlar:
+     key   : benzersiz kod (aynı set içinde tekrar etmez)
+     ad    : karnede/tebliğde görünen ad
+     grup  : 'A' = Verimlilik ve Ciro, 'B' = Müşteri Deneyimi ve Kalite
+     tip   : 'sayi'  → adet/tutar        (oran = gerçekleşen ÷ hedef)
+             'oran'  → yüzde/puan        (oran = gerçekleşen ÷ hedef, % gösterilir)
+             'varyok'→ VAR / YOK         (YOK = Başarılı, VAR = Yetersiz)
+     yon   : 'yuksek' → büyük olan iyi (varsayılan)
+             'dusuk'  → küçük olan iyi (oran = hedef ÷ gerçekleşen)
+     esik  : başarı eşiği. 1 = %100. Excel'de oran yazılmayan metrikler için
+             İK talimatı gereği varsayılan 1 (minimum %100) kabul edilmiştir.
+     vh    : varsayılan hedef (tebliğ ekranında hazır gelir, müdür değiştirebilir)
+     not   : metrik altında görünen açıklama
+--------------------------------------------------------------------------- */
+function M(key,ad,grup,opt){
+  opt=opt||{};
+  return {key:key,ad:ad,grup:grup||'A',
+    tip:opt.tip||'sayi', yon:opt.yon||'yuksek',
+    esik:(opt.esik==null?1:opt.esik),
+    vh:(opt.vh==null?null:opt.vh),
+    not:opt.not||''};
+}
+
+var TANIM_METRIKLER={
+
+/* ---------- BMW · MEKANİK ---------- */
+'BMW::mekanik':[
+  M('is_emri_ucretli','İş Emri Adedi (Ücretli)','A'),
+  M('ciro_ucretli_iscilik','Danışman Başına Servis Cirosu (Ücretli İşçilik)','A'),
+  M('ciro_ucretli_parca','Danışman Başına Servis Cirosu (Ücretli Yedek Parça)','A'),
+  M('is_emri_garanti','İş Emri Adedi (Garanti)','A'),
+  M('ciro_garanti_iscilik','Danışman Başına Servis Cirosu (Garanti İşçilik)','A'),
+  M('ciro_garanti_parca','Danışman Başına Servis Cirosu (Garanti Yedek Parça)','A'),
+  M('arac_basi_iscilik','Araç Başı İşçilik Tutarı (Ücretli + Garanti)','A'),
+  M('arac_basi_parca','Araç Başı Parça Tutarı (Ücretli + Garanti)','A'),
+  M('car_care','Car Care','A'),
+  M('lastik','Lastik','A'),
+  M('aksesuar','Aksesuar','A'),
+  M('rot_balans','Rot Balans','A'),
+  M('abk_orani','ABK Oranı','B',{tip:'oran',not:'Müşterinin aracı geldiğinde yapılan ilk kontrol ve ön inceleme oranı.'}),
+  M('son_kontrol','Son Kontrol Oranı','B',{tip:'oran',not:'Biten araçların kendi iç sistemimizde son kontrolünün yapıldığı oran.'}),
+  M('anket_yanit','Anket Yanıtlama Oranı','B',{tip:'oran',not:'Danışmanın kaç müşterisinin anketi yanıtladığı oranı.'}),
+  M('redflag','Redflag Oranı','B',{tip:'oran',yon:'dusuk',not:'Olumsuz anket oranı — düşük olması hedeflenir.'}),
+  M('nps','NPS Oranı','B',{tip:'oran',not:'Tavsiye skoru.'}),
+  M('aktif_musteri','Aktif Müşteri Oranı','B',{tip:'oran',not:'15 aydır servise uğramayan müşteri oranına göre hesaplanır.'}),
+  M('sikayet','Bireysel Şikâyet Sayısı','B',{tip:'varyok',not:'Şikâyet YOK ise başarılı sayılır.'}),
+  M('bekleyen_is_emri','Bekleyen İş Emri Oranı (%)','B',{tip:'oran',yon:'dusuk'}),
+  M('egitim','Eğitim Tamamlama Oranı (%)','B',{tip:'oran'}),
+  M('borusan_denetim','Borusan Denetim Kriterleri','B')
+],
+
+/* ---------- BMW · GARANTİ ---------- */
+'BMW::garanti':[
+  M('is_emri_garanti','İş Emri Adedi (Garanti)','A'),
+  M('ciro_garanti_iscilik','Danışman Başına Servis Cirosu (Garanti İşçilik)','A'),
+  M('ciro_garanti_parca','Danışman Başına Servis Cirosu (Garanti Yedek Parça)','A'),
+  M('arac_basi_iscilik_g','Araç Başı İşçilik Tutarı (Garanti)','A'),
+  M('arac_basi_parca_g','Araç Başı Parça Tutarı (Garanti)','A'),
+  M('redflag','Redflag Oranı','B',{tip:'oran',yon:'dusuk',not:'Olumsuz anket oranı — düşük olması hedeflenir.'}),
+  M('nps','NPS Oranı','B',{tip:'oran',not:'Tavsiye skoru.'}),
+  M('aktif_musteri','Aktif Müşteri Oranı','B',{tip:'oran'}),
+  M('sikayet','Bireysel Şikâyet Sayısı','B',{tip:'varyok',not:'Şikâyet YOK ise başarılı sayılır.'}),
+  M('bekleyen_is_emri','Bekleyen İş Emri Oranı (%)','B',{tip:'oran',yon:'dusuk'}),
+  M('egitim','Eğitim Tamamlama Oranı (%)','B',{tip:'oran'}),
+  M('garanti_iade','Garanti İade Cirosu / Toplam Ciro','B',{tip:'oran',yon:'dusuk',not:'İthalatçının reddettiği garanti cirosunun payı — düşük olması hedeflenir.'}),
+  M('borusan_denetim','Borusan Denetim Kriterleri','B')
+],
+
+/* ---------- BMW · HASAR ---------- */
+'BMW::hasar':[
+  M('is_emri','İş Emri Adedi','A'),
+  M('ciro_iscilik','Danışman Başına Servis Cirosu (İşçilik)','A'),
+  M('ciro_parca','Danışman Başına Servis Cirosu (Yedek Parça)','A'),
+  M('arac_basi_iscilik','Araç Başı İşçilik Tutarı (Ücretli)','A'),
+  M('arac_basi_parca','Araç Başı Parça Tutarı (Ücretli)','A'),
+  M('car_care','Car Care','A'),
+  M('lastik','Lastik','A'),
+  M('aksesuar','Aksesuar','A'),
+  M('anket_yanit','Anket Yanıtlama Oranı','B',{tip:'oran'}),
+  M('redflag','Redflag Oranı','B',{tip:'oran',yon:'dusuk',not:'Olumsuz anket oranı — düşük olması hedeflenir.'}),
+  M('nps','NPS Oranı','B',{tip:'oran',not:'Tavsiye skoru.'}),
+  M('aktif_musteri','Aktif Müşteri Oranı','B',{tip:'oran'}),
+  M('sikayet','Bireysel Şikâyet Sayısı','B',{tip:'varyok',not:'Şikâyet YOK ise başarılı sayılır.'}),
+  M('bekleyen_is_emri','Bekleyen İş Emri Oranı (%)','B',{tip:'oran',yon:'dusuk'}),
+  M('egitim','Eğitim Tamamlama Oranı (%)','B',{tip:'oran'}),
+  M('gecikmis_bakiye','Gecikmiş Bakiye / Toplam Ciro','B',{tip:'oran',yon:'dusuk',not:'Tahsil edilemeyen bakiyenin ciroya oranı — düşük olması hedeflenir.'}),
+  M('pert_bitirme','Pert Araç Bitirme / Toplam İş Emri Adedi','B',{tip:'oran'}),
+  M('borusan_denetim','Borusan Denetim Kriterleri','B')
+],
+
+/* ---------- FIAT · MEKANİK ---------- */
+'FIAT::mekanik':[
+  M('is_emri_ucretli','İş Emri Adedi (Ücretli)','A'),
+  M('arac_basi_iscilik','Araç Başı İşçilik Tutarı','A'),
+  M('arac_basi_parca','Araç Başı Parça Tutarı','A'),
+  M('car_care','Car Care','A'),
+  M('kontrat','Kontrat (Acil Yol Yardım, Uzatılmış Garanti, Hasar Koruma)','A'),
+  M('lastik','Lastik','A'),
+  M('aksesuar','Aksesuar','A'),
+  M('csi_nps','CSI / NPS Puanı','B',{tip:'oran',not:'Marka bazlı puan/skorun tutup tutmadığına bakılır.'}),
+  M('sikayet','Şikâyet Sayısı','B',{tip:'varyok',not:'Şikâyet YOK ise başarılı sayılır.'}),
+  M('recall','Açık Kampanya / Recall Kapama Oranı (%)','B',{tip:'oran'}),
+  M('kayip_musteri','Kayıp Müşteri Kazanımı','B'),
+  M('bekleyen_is_emri','Bekleyen İş Emri Oranı (%)','B',{tip:'oran',yon:'dusuk'})
+],
+
+/* ---------- HONDA · MEKANİK ---------- */
+'HONDA::mekanik':[
+  M('is_emri_ucretli','İş Emri Adedi (Ücretli)','A',{vh:180}),
+  M('is_emri_garanti','İş Emri Adedi (Kontrol / Garanti)','A'),
+  M('ciro_toplam','Danışman Başına Servis Cirosu (İşçilik + Parça)','A',{vh:13994,
+    not:'Servis bütçe hedefinin danışman sayısına bölünmesiyle bulunur; bütçe hedefinin altına düşmemelidir.'}),
+  M('ort_is_emri','Ortalama İş Emri Tutarı','A',{vh:13994}),
+  M('arac_basi_iscilik','Araç Başı İşçilik Tutarı','A',{vh:5674.89}),
+  M('arac_basi_parca','Araç Başı Parça Tutarı','A',{vh:8319.83}),
+  M('car_care','Car Care','A',{vh:150000}),
+  M('lastik','Lastik','A',{vh:72000}),
+  M('aksesuar','Aksesuar','A',{vh:90000}),
+  M('bakim_paketi','Bakım Paketi','A',{vh:126}),
+  M('csi_nps','CSI / NPS Puanı','B',{tip:'oran',vh:94,not:'Marka bazlı puan/skorun tutup tutmadığına bakılır.'}),
+  M('sikayet','Şikâyet Sayısı','B',{tip:'varyok',not:'Şikâyet YOK ise başarılı sayılır.'}),
+  M('recall','Açık Kampanya / Recall Kapama Oranı (%)','B',{tip:'oran'}),
+  M('sertifikasyon','Danışman Sertifikasyon Durumu (%)','B',{tip:'oran'}),
+  M('bekleyen_is_emri','Bekleyen İş Emri Oranı (%)','B',{tip:'oran',yon:'dusuk'})
+],
+
+/* ---------- HONDA · HASAR ---------- */
+'HONDA::hasar':[
+  M('is_emri_hasar','İş Emri Adedi (Kasko / Pert / Ücretli)','A',{vh:55}),
+  M('is_emri_kontrol_pert','İş Emri Adedi (Kontrol - Pert)','A'),
+  M('ciro_toplam','Danışman Başına Servis Cirosu (İşçilik + Parça)','A',{vh:4509035}),
+  M('ort_is_emri','Ortalama İş Emri Tutarı','A'),
+  M('arac_basi_iscilik','Araç Başı İşçilik Tutarı','A',{vh:26086}),
+  M('arac_basi_parca','Araç Başı Parça Tutarı','A',{vh:55896}),
+  M('car_care','Car Care','A',{vh:50000}),
+  M('csi_nps','CSI / NPS Puanı','B',{tip:'oran',vh:94}),
+  M('sikayet','Şikâyet Sayısı','B',{tip:'varyok',not:'Şikâyet YOK ise başarılı sayılır.'}),
+  M('recall','Açık Kampanya / Recall Kapama Oranı (%)','B',{tip:'oran'}),
+  M('sertifikasyon','Danışman Sertifikasyon Durumu (%)','B',{tip:'oran'}),
+  M('bekleyen_is_emri','Bekleyen İş Emri Oranı (%)','B',{tip:'oran',yon:'dusuk'})
+],
+
+/* ---------- PSA · MEKANİK ---------- */
+'PSA::mekanik':[
+  M('is_emri','İş Emri Adedi','A'),
+  M('ciro_toplam','Danışman Başına Servis Cirosu (İşçilik + Parça)','A'),
+  M('ort_is_emri','Ortalama İş Emri Tutarı','A'),
+  M('arac_basi_iscilik','Araç Başı İşçilik Tutarı','A'),
+  M('arac_basi_parca','Araç Başı Parça Tutarı','A'),
+  M('car_care','Car Care','A'),
+  M('aksesuar','Aksesuar','A'),
+  M('csi_nps','CSI / NPS Puanı','B',{tip:'oran',vh:95,not:'95 ve üstü başarılı sayılır.'}),
+  M('sikayet','Şikâyet Sayısı','B',{tip:'varyok',not:'Şikâyet YOK ise başarılı sayılır.'}),
+  M('recall','Açık Kampanya / Recall Kapama Oranı (%)','B',{tip:'oran'}),
+  M('sertifikasyon','Danışman Sertifikasyon Durumu (%)','B',{tip:'oran'}),
+  M('acik_is_emri','Açık İş Emri Oranı (%)','B',{tip:'oran',yon:'dusuk'})
+],
+
+/* ---------- OMODA & JAECOO · MEKANİK ---------- */
+'OMODA_JAECOO::mekanik':[
+  M('is_emri','İş Emri Adedi','A',{esik:1}),
+  M('ciro_toplam','Danışman Başına Servis Cirosu (İşçilik + Parça)','A',{esik:0.8}),
+  M('ort_is_emri','Ortalama İş Emri Tutarı','A',{esik:0.8}),
+  M('arac_basi_iscilik','Araç Başı İşçilik Tutarı','A',{esik:0.8}),
+  M('arac_basi_parca','Araç Başı Parça Tutarı','A',{esik:0.8}),
+  M('car_care','Car Care','A',{esik:1}),
+  M('ek_satis_iscilik','Ek Satış İşçilikleri','A',{esik:1}),
+  M('aksesuar','Aksesuar','A',{esik:1}),
+  M('sikayet','Şikâyet Sayısı','B',{tip:'varyok',not:'Şikâyet YOK ise başarılı sayılır.'}),
+  M('acik_is_emri','Açık İş Emri Oranı (%)','B',{tip:'oran',yon:'dusuk',esik:0.8})
+],
+
+/* ---------- HASAR DEPARTMANI (şimdilik pasif) ---------- */
+'HASAR::hasar':[
+  M('is_emri','İş Emri Adedi','A'),
+  M('ciro_iscilik','Danışman Başına Servis Cirosu (İşçilik)','A'),
+  M('ciro_parca','Danışman Başına Servis Cirosu (Yedek Parça)','A'),
+  M('sikayet','Şikâyet Sayısı','B',{tip:'varyok'})
+]
+};
+
+/* ---------------------------------------------------------------------------
+   KADRO  —  Çalışan Listesi (Ağustos 2026) esas alınmıştır.
+   aktif:false olanlar sistemde kayıtlıdır ama karne üretilmez; İK panelinden
+   tek tıkla açılabilir.
+     · HASAR departmanı (İbrahim Topçu ekibi) — hasar müdürüyle çalışma
+       tamamlanmadığı için kapalı.
+     · PSA Garanti Uzman Yardımcıları — PSA'da garanti karnesi tanımlanmadığı
+       için kapalı.
+   NOT: FIAT'ta Ahmet Kapusuz çalışan listesinde Ufuk Önsal'a bağlı görünüyordu;
+   Ufuk Önsal satış müdürü olduğu için servis müdürü Fatih Boru'ya bağlandı.
+--------------------------------------------------------------------------- */
+function K(ad,unvan,marka,rol,giris,aktif){
+  return {ad:ad,unvan:unvan,marka:marka,rol:rol,giris:giris,aktif:aktif!==false};
+}
+
+var TANIM_KADRO=[
+  /* BMW — İbrahim Özdemir */
+  K('İsmail Demirel','Servis Danışmanı','BMW','mekanik','07/08/2024'),
+  K('Fatih Daşdemir','Kıdemli Servis Danışmanı','BMW','mekanik','15/04/2021'),
+  K('Zeynep Ulutaş','Garanti Uzmanı','BMW','garanti','04/03/2019'),
+  K('Aslı Barışkan','Hasar Servis Danışmanı','BMW','hasar','21/08/2024'),
+
+  /* FIAT — Fatih Boru */
+  K('İlker Algül','Servis Danışmanı','FIAT','mekanik','08/11/2017'),
+  K('Tuğba Sönmez','Servis Danışmanı','FIAT','mekanik','18/03/2021'),
+  K('Onur Derebaş','Servis Danışmanı','FIAT','mekanik','04/08/2025'),
+  K('Ahmet Kapusuz','Servis Danışmanı','FIAT','mekanik','23/05/2024'),
+
+  /* HONDA — Memet Orhan Çavdar */
+  K('Hamza Tunahan Çelik','Servis Danışmanı','HONDA','mekanik','17/02/2025'),
+  K('Rifat Can Özdayı','Servis Danışmanı','HONDA','mekanik','05/05/2025'),
+  K('Meltem Çimen','Servis Danışmanı','HONDA','mekanik','22/12/2025'),
+
+  /* PSA — Birol Caner */
+  K('Alper Özdemir','Servis Teknik Danışman','PSA','mekanik','03/01/2022'),
+  K('Abdulkadir Akar','Servis Danışmanı','PSA','mekanik','18/03/2025'),
+  K('Betül Akca','Servis Danışmanı','PSA','mekanik','13/04/2026'),
+  K('Yeternur Baran','Servis Danışmanı','PSA','mekanik','11/05/2026'),
+  K('Caner Anıl Aksoy','Servis Danışmanı','PSA','mekanik','02/06/2026'),
+  K('İbrahim Doğan','Servis Danışmanı','PSA','mekanik','02/06/2026'),
+  K('Emrecan Yücel','Garanti Uzman Yardımcısı','PSA','mekanik','05/05/2025',false),
+  K('Mirkan Çolak','Garanti Uzman Yardımcısı','PSA','mekanik','16/06/2025',false),
+
+  /* HASAR — İbrahim Topçu (tamamı pasif) */
+  K('Çağrı Güneri','Hasar Servis Danışmanı','HASAR','hasar','10/01/2024',false),
+  K('Hamdi Yeşil','Hasar Servis Danışmanı','HASAR','hasar','08/07/2024',false),
+  K('Fatoş Polat','Hasar Servis Danışmanı','HASAR','hasar','16/09/2024',false),
+  K('Necla Nur Erciyes','Hasar Servis Danışmanı','HASAR','hasar','21/08/2024',false),
+  K('Sefa Göktaş','Hasar Servis Danışmanı','HASAR','hasar','23/09/2024',false)
+];
+
+/* ---------------------------------------------------------------------------
+   KULLANICILAR
+   hash = SHA-256( kullaniciAdi.toLowerCase() + "::" + sifre )
+   Başlangıç şifreleri devir teslimde İK tarafından değiştirilmelidir
+   (üst bardaki 🔑 düğmesi).
+--------------------------------------------------------------------------- */
+var TANIM_USERS=[
+  {kullanici:'admin', ad:'İnsan Kaynakları', rol:'admin', marka:'',
+   hash:'34b5789c91566f8be659233ffcaae6d3bbc9e198506a98aaef35938157aa0cfe'},
+  {kullanici:'bmw',   ad:'İbrahim Özdemir',    rol:'mudur', marka:'BMW',
+   hash:'1f51e932b58fbd7556bf3ef0e2a76c2a8ca9424c77d838f7b92f67502468237a'},
+  {kullanici:'fiat',  ad:'Fatih Boru',         rol:'mudur', marka:'FIAT',
+   hash:'d19782e056dddd82175cb489889534bff84b195be925204d494a0563ab6f34e1'},
+  {kullanici:'honda', ad:'Memet Orhan Çavdar', rol:'mudur', marka:'HONDA',
+   hash:'77e54e788ca5c5d72cce525e9f10a18fc2513dfce9fc64406b3f482e669a6276'},
+  {kullanici:'psa',   ad:'Birol Caner',        rol:'mudur', marka:'PSA',
+   hash:'941c82641ef51bd6a3d1d2f581c97602c5b71a5182fce9b15646b7ea33c2544f'},
+  {kullanici:'hasar', ad:'İbrahim Topçu',      rol:'mudur', marka:'HASAR',
+   hash:'21ead06765004b452725d3168b5a61c2b37ad271dd125d6359fc52900ea4c97a'}
+];
+
+/* ============================================================================
+   ÇEKİRDEK — yardımcılar, oturum, durum, hesaplama, senkron
+   ========================================================================== */
+
+/* ---------- küçük yardımcılar ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function elId(i){return document.getElementById(i);}
+function trLower(s){return String(s).replace(/İ/g,'i').replace(/I/g,'ı').toLocaleLowerCase('tr');}
+function slug(s){return trLower(String(s)).replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');}
+function fmtSayi(n){
+  if(n==null||n==='')return '—';
+  var x=Number(n); if(!isFinite(x))return '—';
+  return x.toLocaleString('tr-TR',{maximumFractionDigits:2});
+}
+function fmtYuzde(o){
+  if(o==null||!isFinite(o))return '—';
+  return (o*100).toLocaleString('tr-TR',{maximumFractionDigits:1})+'%';
+}
+function bugunTR(){
+  var d=new Date();
+  return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
+}
+function isoTarihTR(iso){
+  if(!iso)return '—';
+  var d=new Date(iso); if(isNaN(d))return '—';
+  return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
+}
+function toNum(v){
+  if(v==null)return null;
+  var s=String(v).trim(); if(s==='')return null;
+  s=s.replace(/\s/g,'').replace(/\./g,'').replace(',','.');   /* 1.234,56 → 1234.56 */
+  var n=Number(s);
+  return isFinite(n)?n:null;
+}
+function toast(msg,ms){
+  var t=elId('toast'); if(!t)return;
+  t.textContent=msg; t.classList.add('on');
+  clearTimeout(t._tmr); t._tmr=setTimeout(function(){t.classList.remove('on');},ms||2600);
+}
+function sha256(str){
+  /* Basit, bağımlılıksız SHA-256 (senkron) — şifre doğrulama için yeterli. */
+  function rr(n,x){return (x>>>n)|(x<<(32-n));}
+  var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+    0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+    0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+    0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var bytes=[],i;
+  for(i=0;i<str.length;i++)bytes.push(str.charCodeAt(i)&0xff);
+  var bitLen=bytes.length*8;
+  bytes.push(0x80);
+  while(bytes.length%64!==56)bytes.push(0);
+  for(i=7;i>=0;i--)bytes.push((bitLen/Math.pow(2,i*8))&0xff);
+  for(var b=0;b<bytes.length;b+=64){
+    var w=new Array(64);
+    for(i=0;i<16;i++)w[i]=(bytes[b+i*4]<<24)|(bytes[b+i*4+1]<<16)|(bytes[b+i*4+2]<<8)|bytes[b+i*4+3];
+    for(i=16;i<64;i++){
+      var s0=rr(7,w[i-15])^rr(18,w[i-15])^(w[i-15]>>>3);
+      var s1=rr(17,w[i-2])^rr(19,w[i-2])^(w[i-2]>>>10);
+      w[i]=(w[i-16]+s0+w[i-7]+s1)|0;
+    }
+    var a=H[0],bb=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(i=0;i<64;i++){
+      var S1=rr(6,e)^rr(11,e)^rr(25,e), ch=(e&f)^((~e)&g);
+      var t1=(h+S1+ch+K[i]+w[i])|0;
+      var S0=rr(2,a)^rr(13,a)^rr(22,a), mj=(a&bb)^(a&c)^(bb&c);
+      var t2=(S0+mj)|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=bb;bb=a;a=(t1+t2)|0;
+    }
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+bb)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;
+    H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  return H.map(function(x){return ('00000000'+(x>>>0).toString(16)).slice(-8);}).join('');
+}
+function hashPw(user,pw){
+  return sha256(unescape(encodeURIComponent(trLower(user)+'::'+pw)));
+}
+
+/* ---------- durum ---------- */
+var LS={veri:'sp_servis_veri',teblig:'sp_servis_teblig',karne:'sp_servis_karne',ses:'sp_servis_ses'};
+var WORK={markalar:null,metrikler:null,kadro:null,users:null};
+var TEBLIGLER=[], KARNELER=[];
+var SES=null, TAB='teblig';
+var ROL_ETIKET={admin:'İNSAN KAYNAKLARI',mudur:'SERVİS MÜDÜRÜ'};
+
+function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(_){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(_){}}
+
+/* Sabit tanımların derin kopyası — Firestore'dan gelen veri bunun üzerine biner. */
+function varsayilanVeri(){
+  return {
+    markalar:JSON.parse(JSON.stringify(TANIM_MARKALAR)),
+    metrikler:JSON.parse(JSON.stringify(TANIM_METRIKLER)),
+    kadro:JSON.parse(JSON.stringify(TANIM_KADRO)),
+    users:JSON.parse(JSON.stringify(TANIM_USERS))
+  };
+}
+function veriYukle(){
+  var kayitli=lsGet(LS.veri,null);
+  var v=varsayilanVeri();
+  if(kayitli&&typeof kayitli==='object'){
+    if(kayitli.markalar&&kayitli.markalar.length)v.markalar=kayitli.markalar;
+    if(kayitli.metrikler&&Object.keys(kayitli.metrikler).length)v.metrikler=kayitli.metrikler;
+    if(kayitli.kadro&&kayitli.kadro.length)v.kadro=kayitli.kadro;
+    if(kayitli.users&&kayitli.users.length)v.users=kayitli.users;
+  }
+  WORK=v;
+  TEBLIGLER=lsGet(LS.teblig,[])||[];
+  KARNELER=lsGet(LS.karne,[])||[];
+}
+function veriKaydet(sessiz){
+  lsSet(LS.veri,{markalar:WORK.markalar,metrikler:WORK.metrikler,kadro:WORK.kadro,users:WORK.users});
+  if(window.ServisFB&&window.ServisFB.pushVeri){
+    window.ServisFB.pushVeri({markalar:WORK.markalar,metrikler:WORK.metrikler,
+      kadro:WORK.kadro,users:WORK.users})
+      .then(function(){if(!sessiz)senkDurum('ok');})
+      .catch(function(e){senkDurum('err',e&&e.message);});
+  }
+}
+
+/* ---------- senkron göstergesi ---------- */
+function senkDurum(d,msg){
+  var box=elId('syncBox'), txt=elId('syncTxt'); if(!box||!txt)return;
+  box.classList.remove('off','err');
+  if(d==='ok'){txt.textContent='Eşitlendi';}
+  else if(d==='bekle'){txt.textContent='Eşitleniyor…';box.classList.add('off');}
+  else if(d==='yerel'){txt.textContent='Yerel mod';box.classList.add('off');}
+  else{box.classList.add('err');txt.textContent='Bağlantı yok';}
+  box.title=msg||(d==='ok'?'Veriler buluta yazıldı.':'Değişiklikler bu cihazda saklanıyor.');
+}
+
+/* ---------- marka / rol / kadro erişimi ---------- */
+function markaBul(kod){return (WORK.markalar||[]).find(function(m){return m.kod===kod;})||null;}
+function markaAd(kod){var m=markaBul(kod);return m?m.ad:kod;}
+function markaMudur(kod){var m=markaBul(kod);return m?(m.mudur||''):'';}
+function aktifMarkalar(){return (WORK.markalar||[]).filter(function(m){return m.aktif!==false;});}
+function setKey(marka,rol){return marka+'::'+rol;}
+function metrikSeti(marka,rol){return (WORK.metrikler||{})[setKey(marka,rol)]||[];}
+function rolAd(rol){return ROL_AD[rol]||rol;}
+
+/* Bir markanın, o markada gerçekten kadrosu olan rolleri. */
+function markaRolleri(marka){
+  var m=markaBul(marka); if(!m)return [];
+  return (m.roller||[]).filter(function(r){return (WORK.metrikler||{})[setKey(marka,r)];});
+}
+function kadroListe(marka,rol,hepsi){
+  return (WORK.kadro||[]).filter(function(k){
+    if(marka&&k.marka!==marka)return false;
+    if(rol&&k.rol!==rol)return false;
+    if(!hepsi&&k.aktif===false)return false;
+    return true;
+  });
+}
+function kadroBul(ad,marka){
+  return (WORK.kadro||[]).find(function(k){return k.ad===ad&&(!marka||k.marka===marka);})||null;
+}
+/* Oturumdaki kullanıcının erişebildiği markalar. */
+function yetkiliMarkalar(){
+  if(!SES)return [];
+  if(SES.rol==='admin')return aktifMarkalar().map(function(m){return m.kod;});
+  return SES.marka?[SES.marka]:[];
+}
+
+/* ---------- HESAPLAMA ---------- */
+/* Metrik tipine ve yönüne göre başarı oranı.
+   'dusuk' yönlü metriklerde (Redflag, Bekleyen İş Emri, Garanti İade …)
+   küçük gerçekleşme iyidir; oran = hedef ÷ gerçekleşen. */
+function oranHesap(m,hedef,gerc){
+  if(!m||m.tip==='varyok')return null;
+  var h=toNum(hedef), g=toNum(gerc);
+  if(h==null||g==null)return null;
+  if(m.yon==='dusuk'){
+    if(g<=0)return 2;               /* hiç olumsuzluk yok → tam başarı (üst sınır) */
+    if(h<=0)return 0;
+    return Math.min(h/g,2);
+  }
+  if(h<=0)return null;
+  return g/h;
+}
+function durumOner(m,r){
+  if(!m)return '';
+  if(m.tip==='varyok'){
+    var v=(r.gerceklesen==null?'':String(r.gerceklesen)).toUpperCase();
+    if(v!=='VAR'&&v!=='YOK')return '';
+    return v==='YOK'?'Başarılı':'Yetersiz';
+  }
+  var o=oranHesap(m,r.hedef,r.gerceklesen);
+  if(o==null)return '';
+  var esik=(m.esik==null?1:m.esik);
+  return (o>=esik-1e-9)?'Başarılı':'Yetersiz';
+}
+function durumRozet(d){
+  if(d==='Başarılı')return '<span class="badge b-ok">Başarılı</span>';
+  if(d==='Yetersiz')return '<span class="badge b-bad">Yetersiz</span>';
+  if(d==='Etkisi Yok')return '<span class="badge b-mut">Etkisi Yok</span>';
+  return '<span class="badge b-mut">—</span>';
+}
+function oranRozet(m,r){
+  if(m.tip==='varyok'){
+    var v=(r.gerceklesen==null?'':String(r.gerceklesen)).toUpperCase();
+    if(v==='YOK')return '<span class="badge b-ok">YOK</span>';
+    if(v==='VAR')return '<span class="badge b-bad">VAR</span>';
+    return '<span class="badge b-mut">—</span>';
+  }
+  var o=oranHesap(m,r.hedef,r.gerceklesen);
+  if(o==null)return '<span class="badge b-mut">—</span>';
+  var esik=(m.esik==null?1:m.esik);
+  var cls=(o>=esik-1e-9)?'b-ok':(o>=esik*0.85?'b-warn':'b-bad');
+  return '<span class="badge '+cls+'">'+fmtYuzde(o)+'</span>';
+}
+/* Karnenin özeti: kaç metrik değerlendirildi, kaçı yetersiz. */
+function karneOzet(k){
+  var ms=metrikSeti(k.marka,k.rol), toplam=0, basarili=0, yetersiz=0;
+  (k.metrikler||[]).forEach(function(r){
+    if(r.durum==='Etkisi Yok')return;
+    var m=ms.find(function(x){return x.key===r.key;}); if(!m)return;
+    if(r.durum==='Başarılı'){toplam++;basarili++;}
+    else if(r.durum==='Yetersiz'){toplam++;yetersiz++;}
+  });
+  return {toplam:toplam,basarili:basarili,yetersiz:yetersiz,
+    oran:toplam?basarili/toplam:null};
+}
+
+/* ---------- KAYIT ANAHTARLARI ---------- */
+function kayitId(yil,ay,marka,rol,danisman){
+  return yil+'_'+('0'+ay).slice(-2)+'_'+slug(marka)+'_'+rol+'_'+slug(danisman);
+}
+function tebligBul(yil,ay,marka,rol,dan){
+  var id=kayitId(yil,ay,marka,rol,dan);
+  return TEBLIGLER.find(function(t){return t.id===id;})||null;
+}
+function karneBul(yil,ay,marka,rol,dan){
+  var id=kayitId(yil,ay,marka,rol,dan);
+  return KARNELER.find(function(k){return k.id===id;})||null;
+}
+function tebligYaz(t){
+  var i=TEBLIGLER.findIndex(function(x){return x.id===t.id;});
+  if(i>=0)TEBLIGLER[i]=t; else TEBLIGLER.push(t);
+  lsSet(LS.teblig,TEBLIGLER);
+  if(window.ServisFB&&window.ServisFB.pushTeblig){
+    senkDurum('bekle');
+    window.ServisFB.pushTeblig(t).then(function(){senkDurum('ok');})
+      .catch(function(e){senkDurum('err',e&&e.message);});
+  }
+}
+function karneYaz(k){
+  var i=KARNELER.findIndex(function(x){return x.id===k.id;});
+  if(i>=0)KARNELER[i]=k; else KARNELER.push(k);
+  lsSet(LS.karne,KARNELER);
+  if(window.ServisFB&&window.ServisFB.pushKarne){
+    senkDurum('bekle');
+    window.ServisFB.pushKarne(k).then(function(){senkDurum('ok');})
+      .catch(function(e){senkDurum('err',e&&e.message);});
+  }
+}
+
+/* ---------- FIRESTORE'DAN GELEN CANLI VERİ ---------- */
+window.servisVeriGeldi=function(payload){
+  if(!payload)return;
+  var d=false;
+  if(payload.markalar&&payload.markalar.length){WORK.markalar=payload.markalar;d=true;}
+  if(payload.metrikler&&Object.keys(payload.metrikler).length){WORK.metrikler=payload.metrikler;d=true;}
+  if(payload.kadro&&payload.kadro.length){WORK.kadro=payload.kadro;d=true;}
+  if(payload.users&&payload.users.length){WORK.users=payload.users;d=true;}
+  if(d){lsSet(LS.veri,{markalar:WORK.markalar,metrikler:WORK.metrikler,kadro:WORK.kadro,users:WORK.users});
+    senkDurum('ok'); if(SES)render();}
+};
+window.servisTebliglerGeldi=function(list){
+  if(!list)return;
+  TEBLIGLER=list; lsSet(LS.teblig,TEBLIGLER);
+  senkDurum('ok'); if(SES)render();
+};
+window.servisKarnelerGeldi=function(list){
+  if(!list)return;
+  KARNELER=list; lsSet(LS.karne,KARNELER);
+  senkDurum('ok'); if(SES)render();
+};
+window.servisBaglantiHatasi=function(msg){senkDurum('err',msg);};
+
+/* ---------- OTURUM ---------- */
+veriYukle();
+
+elId('loginForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var u=elId('u').value.trim(), p=elId('p').value, err=elId('loginErr');
+  var h=hashPw(u,p);
+  var user=(WORK.users||[]).find(function(x){
+    return trLower(x.kullanici)===trLower(u)&&x.hash===h;});
+  if(!user){err.textContent='Kullanıcı adı veya şifre hatalı.';return;}
+  err.textContent='';
+  SES={kullanici:user.kullanici,ad:user.ad,rol:user.rol,marka:user.marka||''};
+  try{sessionStorage.setItem(LS.ses,JSON.stringify(SES));}catch(_){}
+  uygulamaBaslat();
+});
+elId('logoutBtn').addEventListener('click',function(){
+  SES=null;
+  try{sessionStorage.removeItem(LS.ses);}catch(_){}
+  elId('app').classList.add('hidden');
+  elId('login').classList.remove('hidden');
+  elId('p').value='';
+});
+elId('pwBtn').addEventListener('click',function(){sifreModal();});
+
+function uygulamaBaslat(){
+  elId('login').classList.add('hidden');
+  elId('app').classList.remove('hidden');
+  elId('whoAd').textContent=SES.ad;
+  elId('whoRol').textContent=ROL_ETIKET[SES.rol]||SES.rol;
+  var d=new Date();
+  /* Varsayılan dönem: içinde bulunduğumuz ay (karne için bir önceki ay). */
+  SEC.yil=d.getFullYear(); SEC.ay=d.getMonth()+1;
+  SECK.yil=d.getFullYear(); SECK.ay=d.getMonth()===0?12:d.getMonth();
+  if(d.getMonth()===0)SECK.yil=d.getFullYear()-1;
+  var ym=yetkiliMarkalar();
+  SEC.marka=SEC.marka||ym[0]||''; SECK.marka=SECK.marka||ym[0]||'';
+  SEC.rol=(markaRolleri(SEC.marka)[0]||'mekanik');
+  SECK.rol=(markaRolleri(SECK.marka)[0]||'mekanik');
+  TAB=(SES.rol==='admin')?'genel':'teblig';
+  sekmeleriKur(); render();
+  senkDurum(window.ServisFB?'bekle':'yerel');
+}
+/* Sayfa yenilendiğinde oturumu sürdür. */
+(function(){
+  try{
+    var s=JSON.parse(sessionStorage.getItem(LS.ses)||'null');
+    if(s&&s.kullanici){SES=s;setTimeout(uygulamaBaslat,0);}
+  }catch(_){}
+})();
+
+/* ---------- ŞİFRE DEĞİŞTİRME ---------- */
+function sifreModal(){
+  modalAc('Şifre Değiştir',
+    '<p>Yeni şifreniz bu cihazda ve bulutta güncellenir. Sistemi kullanan diğer '+
+    'yöneticilerin şifreleri etkilenmez.</p>'+
+    '<div class="fld"><label>Mevcut Şifre</label><input id="pwEski" type="password"></div>'+
+    '<div class="fld"><label>Yeni Şifre (en az 6 karakter)</label><input id="pwYeni" type="password"></div>'+
+    '<div class="fld"><label>Yeni Şifre (tekrar)</label><input id="pwYeni2" type="password"></div>'+
+    '<div id="pwErr" style="color:var(--bad);font-size:12.5px;min-height:17px"></div>',
+    [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
+     {ad:'Kaydet',cls:'btn dark',fn:function(){
+       var e=elId('pwEski').value, y=elId('pwYeni').value, y2=elId('pwYeni2').value, er=elId('pwErr');
+       var user=(WORK.users||[]).find(function(x){return x.kullanici===SES.kullanici;});
+       if(!user){er.textContent='Kullanıcı bulunamadı.';return;}
+       if(user.hash!==hashPw(user.kullanici,e)){er.textContent='Mevcut şifre hatalı.';return;}
+       if(y.length<6){er.textContent='Yeni şifre en az 6 karakter olmalı.';return;}
+       if(y!==y2){er.textContent='Yeni şifreler birbiriyle aynı değil.';return;}
+       user.hash=hashPw(user.kullanici,y);
+       veriKaydet(); modalKapat(); toast('✓ Şifreniz güncellendi.');
+     }}]);
+}
+
+/* ---------- MODAL ---------- */
+function modalAc(baslik,govde,butonlar,tehlike){
+  var root=elId('ovRoot');
+  root.innerHTML='<div class="ov"><div class="ov-box">'+
+    '<div class="ov-h'+(tehlike?' bad':'')+'">'+esc(baslik)+'</div>'+
+    '<div class="ov-b">'+govde+'</div>'+
+    '<div class="ov-f" id="ovF"></div></div></div>';
+  var f=elId('ovF');
+  (butonlar||[{ad:'Kapat',cls:'btn',fn:modalKapat}]).forEach(function(b,i){
+    var el=document.createElement('button');
+    el.className=b.cls||'btn'; el.textContent=b.ad; el.onclick=b.fn;
+    f.appendChild(el);
+  });
+  root.querySelector('.ov').addEventListener('mousedown',function(ev){
+    if(ev.target===this)modalKapat();
+  });
+}
+function modalKapat(){elId('ovRoot').innerHTML='';}
+
+/* ---------- YAZDIRMA PENCERESİ ---------- */
+function yazdirAc(html){
+  var w=window.open('','_blank');
+  if(!w){toast('⚠ Açılır pencere engellendi. Tarayıcının adres çubuğundaki engeli kaldırın.',5000);return null;}
+  w.document.open(); w.document.write(html); w.document.close(); w.focus();
+  return w;
+}
+
+/* ============================================================================
+   SEKMELER ve GENEL RENDER
+   ========================================================================== */
+var SEC ={yil:2026,ay:1,marka:'',rol:'',danisman:''};   /* Hedef Tebliğ ekranı */
+var SECK={yil:2026,ay:1,marka:'',rol:'',danisman:''};   /* Karne ekranı        */
+var FLT ={yil:'',ay:'',marka:'',durum:''};              /* İK liste filtreleri */
+
+function sekmeleriKur(){
+  var t;
+  if(SES.rol==='admin'){
+    t=[['genel','Genel Bakış'],['teblig','1 · Hedef Tebliğ'],['karne','2 · Karne'],
+       ['gb','3 · Geri Bildirim'],['metrik','Metrik Yönetimi'],['kadro','Kadro & Kullanıcılar']];
+  }else{
+    t=[['teblig','1 · Hedef Tebliğ'],['karne','2 · Karne'],['gb','3 · Geri Bildirim']];
+  }
+  elId('tabs').innerHTML=t.map(function(x){
+    return '<button class="tab'+(TAB===x[0]?' on':'')+'" data-t="'+x[0]+'">'+esc(x[1])+'</button>';
+  }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(b){
+    b.onclick=function(){TAB=b.dataset.t;sekmeleriKur();render();};
+  });
+}
+
+function render(){
+  var v=elId('view'); if(!v)return;
+  var html='';
+  if(TAB==='genel')      html=viewGenel();
+  else if(TAB==='teblig')html=viewTeblig();
+  else if(TAB==='karne') html=viewKarne();
+  else if(TAB==='gb')    html=viewGeriBildirim();
+  else if(TAB==='metrik')html=viewMetrik();
+  else if(TAB==='kadro') html=viewKadro();
+  v.innerHTML=html;
+  baglaOlaylar();
+}
+
+/* Üstteki 3 adımlı süreç şeridi. */
+function adimSeridi(aktif){
+  var a=[['1','Hedef Tebliğ','Ayın ilk haftası'],
+         ['2','Aylık Karne','Ay bitiminde'],
+         ['3','Geri Bildirim','Yetersizlik halinde']];
+  return '<div class="steps">'+a.map(function(x,i){
+    var n=i+1, cls=(n===aktif?'step on':(n<aktif?'step done':'step'));
+    return '<div class="'+cls+'"><div class="step-n">'+(n<aktif?'✓':x[0])+'</div>'+
+      '<div class="step-t"><b>'+x[1]+'</b><span>'+x[2]+'</span></div></div>';
+  }).join('')+'</div>';
+}
+
+/* Dönem + marka + danışman seçim çubuğu.
+   pfx: 'T' → Hedef Tebliğ ekranı, 'K' → Karne ekranı. */
+function secimCubugu(pfx,S){
+  var yillar=[], yl=new Date().getFullYear();
+  for(var y=yl+1;y>=2025;y--)yillar.push(y);
+  var ym=yetkiliMarkalar();
+  var markaSel=(SES.rol==='admin')
+    ? '<div class="f"><label>Marka</label><select id="'+pfx+'Marka">'+
+      ym.map(function(k){return '<option value="'+k+'"'+(S.marka===k?' selected':'')+'>'+esc(markaAd(k))+'</option>';}).join('')+
+      '</select></div>'
+    : '<div class="f"><label>Marka</label><select id="'+pfx+'Marka" disabled><option>'+esc(markaAd(S.marka))+'</option></select></div>';
+
+  var kadro=kadroListe(S.marka,'',false);
+  var danSel='<div class="f"><label>Servis Danışmanı</label><select id="'+pfx+'Dan" style="min-width:230px">'+
+    '<option value="">— Danışman seçiniz —</option>'+
+    kadro.map(function(k){
+      return '<option value="'+esc(k.ad)+'"'+(S.danisman===k.ad?' selected':'')+'>'+
+        esc(k.ad)+'  ·  '+esc(rolAd(k.rol).replace(' Servis Danışmanı',''))+'</option>';
+    }).join('')+'</select></div>';
+
+  return '<div class="card"><div class="card-b"><div class="row">'+
+    '<div class="f"><label>Yıl</label><select id="'+pfx+'Yil">'+
+      yillar.map(function(y){return '<option value="'+y+'"'+(S.yil===y?' selected':'')+'>'+y+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="f"><label>Ay</label><select id="'+pfx+'Ay">'+
+      AYLAR.map(function(a,i){return '<option value="'+(i+1)+'"'+(S.ay===i+1?' selected':'')+'>'+a+'</option>';}).join('')+
+    '</select></div>'+
+    markaSel+danSel+
+    '</div></div></div>';
+}
+
+/* ============================================================================
+   1. ADIM — HEDEF TEBLİĞ
+   ========================================================================== */
+function tebligYeni(yil,ay,marka,rol,dan){
+  var kisi=kadroBul(dan,marka)||{};
+  return {
+    id:kayitId(yil,ay,marka,rol,dan),
+    yil:yil, ay:ay, marka:marka, rol:rol, danisman:dan,
+    unvan:kisi.unvan||'', yoneticiAd:markaMudur(marka),
+    metrikler:metrikSeti(marka,rol).map(function(m){
+      return {key:m.key, hedef:(m.vh==null?null:m.vh)};
+    }),
+    guncelleme:null, ciktiTarihi:null, ikGonderildi:false,
+    tebligEdildi:false, redMi:false, redNot:''
+  };
+}
+
+function viewTeblig(){
+  var S=SEC, h=adimSeridi(1)+secimCubugu('T',S);
+  if(!S.danisman){
+    h+='<div class="card"><div class="empty"><b>Danışman seçiniz</b>'+
+       'Yukarıdan bir servis danışmanı seçtiğinizde o kişinin '+esc(AYLAR[S.ay-1])+' '+S.yil+
+       ' dönemi hedef tebliğ formu açılacaktır.</div></div>';
+    return h+tebligDonemListesi();
+  }
+  var kisi=kadroBul(S.danisman,S.marka);
+  if(!kisi)return h+'<div class="card"><div class="empty"><b>Kayıt bulunamadı</b>Seçilen danışman kadroda yok.</div></div>';
+  S.rol=kisi.rol;
+
+  var t=tebligBul(S.yil,S.ay,S.marka,S.rol,S.danisman)||tebligYeni(S.yil,S.ay,S.marka,S.rol,S.danisman);
+  var ms=metrikSeti(S.marka,S.rol);
+  var hedefMap={}; (t.metrikler||[]).forEach(function(r){hedefMap[r.key]=r.hedef;});
+
+  /* Durum rozetleri */
+  var rz='';
+  if(t.tebligEdildi)      rz+='<span class="badge b-ok">✓ Tebliğ Edildi</span> ';
+  else if(t.redMi)        rz+='<span class="badge b-bad">⚠ Tebliğ Alınmadı</span> ';
+  else if(t.ikGonderildi) rz+='<span class="badge b-info">İK\'ya Gönderildi</span> ';
+  else if(t.ciktiTarihi)  rz+='<span class="badge b-gold">🖨 Çıktı Alındı</span> ';
+  else if(t.guncelleme)   rz+='<span class="badge b-warn">Taslak</span> ';
+  else                    rz+='<span class="badge b-mut">Yeni Form</span> ';
+
+  var kilitli=!!(t.tebligEdildi&&SES.rol!=='admin');
+
+  /* Metrik satırları */
+  var grupA=ms.filter(function(m){return m.grup==='A';});
+  var grupB=ms.filter(function(m){return m.grup!=='A';});
+  function satirlar(list){
+    return list.map(function(m){
+      var hv=hedefMap[m.key];
+      var esikTxt=(m.tip==='varyok')?'YOK olmalı':('min. %'+Math.round((m.esik==null?1:m.esik)*100));
+      var giris=(m.tip==='varyok')
+        ? '<select class="mtr-sel t-h" data-k="'+m.key+'"'+(kilitli?' disabled':'')+'>'+
+          ['','VAR / YOK'].map(function(o){return '<option value="'+o+'"'+((hv||'')===o?' selected':'')+'>'+(o||'—')+'</option>';}).join('')+
+          '</select>'
+        : '<input class="mtr-in t-h" data-k="'+m.key+'" inputmode="decimal" value="'+
+          (hv==null?'':esc(hv))+'" placeholder="—"'+(kilitli?' readonly':'')+'>';
+      return '<tr><td><span class="mtr-ad">'+esc(m.ad)+'</span>'+
+        (m.not?'<span class="mtr-not">'+esc(m.not)+'</span>':'')+'</td>'+
+        '<td class="num">'+giris+'</td>'+
+        '<td><span class="mtr-hedef-info">'+esikTxt+(m.yon==='dusuk'?' · düşük iyi':'')+'</span></td></tr>';
+    }).join('');
+  }
+  var tbody='';
+  if(grupA.length)tbody+='<tr class="grp-row"><td colspan="3">A) Verimlilik ve Ciro</td></tr>'+satirlar(grupA);
+  if(grupB.length)tbody+='<tr class="grp-row"><td colspan="3">B) Müşteri Deneyimi ve Kalite</td></tr>'+satirlar(grupB);
+
+  h+='<div class="card">'+
+    '<div class="card-h"><h3>Hedef Tebliğ Formu</h3>'+
+      '<span class="sub">'+esc(S.danisman)+' · '+esc(kisi.unvan)+' · '+esc(markaAd(S.marka))+' · '+
+      esc(AYLAR[S.ay-1])+' '+S.yil+'</span>'+
+      '<div style="flex:1"></div>'+rz+
+    '</div>'+
+    (kilitli?'<div class="card-b" style="padding-bottom:0"><div class="note warn">Bu form çalışana tebliğ edilmiştir ve kilitlenmiştir. Değişiklik için İnsan Kaynakları ile görüşünüz.</div></div>':'')+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+      '<thead><tr><th style="min-width:280px">Performans Metriği</th><th class="num" style="width:170px">Aylık Hedef</th><th style="width:190px">Başarı Eşiği</th></tr></thead>'+
+      '<tbody>'+tbody+'</tbody></table></div></div>'+
+    '<div class="card-b" style="border-top:1px solid var(--grid);display:flex;gap:10px;flex-wrap:wrap;align-items:center">'+
+      (kilitli?'':'<button class="btn dark" id="tKaydet">Hedefleri Kaydet</button>')+
+      '<button class="btn gold" id="tYazdir">🖨 Formu Yazdır / PDF</button>'+
+      (t.ikGonderildi?'':'<button class="btn" id="tIK">📤 İK\'ya Gönderildi İşaretle</button>')+
+      (SES.rol==='admin'&&t.ikGonderildi&&!t.tebligEdildi?'<button class="btn" id="tEdildi" style="color:var(--ok);border-color:#a8ddaa">✓ Tebliğ Edildi</button>':'')+
+      (SES.rol==='admin'&&t.ikGonderildi&&!t.tebligEdildi?'<button class="btn danger" id="tRed">⚠ Tebliğ Alınmadı</button>':'')+
+      '<div style="flex:1"></div>'+
+      '<span style="font-size:11.5px;color:var(--muted)">'+
+        (t.guncelleme?'Son kayıt: '+isoTarihTR(t.guncelleme):'Henüz kaydedilmedi')+
+      '</span>'+
+    '</div></div>';
+
+  return h+tebligDonemListesi();
+}
+
+/* Seçili dönemde ekibin tebliğ durumu — müdür kendi markasını, İK hepsini görür. */
+function tebligDonemListesi(){
+  var S=SEC, markalar=(SES.rol==='admin')?[S.marka]:[SES.marka];
+  var satir='';
+  markalar.forEach(function(mk){
+    kadroListe(mk,'',false).forEach(function(k){
+      var t=tebligBul(S.yil,S.ay,mk,k.rol,k.ad);
+      var durum,cls;
+      if(!t||!t.guncelleme){durum='Girilmedi';cls='b-mut';}
+      else if(t.tebligEdildi){durum='Tebliğ Edildi';cls='b-ok';}
+      else if(t.redMi){durum='Tebliğ Alınmadı';cls='b-bad';}
+      else if(t.ikGonderildi){durum='İK\'da';cls='b-info';}
+      else if(t.ciktiTarihi){durum='Çıktı Alındı';cls='b-gold';}
+      else {durum='Taslak';cls='b-warn';}
+      var dolu=t?(t.metrikler||[]).filter(function(r){return r.hedef!=null&&r.hedef!=='';}).length:0;
+      var top=metrikSeti(mk,k.rol).length;
+      satir+='<tr><td><b>'+esc(k.ad)+'</b></td><td>'+esc(k.unvan)+'</td>'+
+        '<td>'+esc(rolAd(k.rol))+'</td>'+
+        '<td class="num">'+dolu+' / '+top+'</td>'+
+        '<td><span class="badge '+cls+'">'+durum+'</span></td>'+
+        '<td><button class="btn-sm" data-git-t="'+esc(k.ad)+'">Aç</button></td></tr>';
+    });
+  });
+  if(!satir)return '';
+  return '<div class="card"><div class="card-h"><h3>Dönem Durumu</h3>'+
+    '<span class="sub">'+esc(AYLAR[SEC.ay-1])+' '+SEC.yil+' · '+esc(markaAd(SEC.marka))+'</span></div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+    '<thead><tr><th>Danışman</th><th>Unvan</th><th>Karne Tipi</th><th class="num">Girilen Hedef</th><th>Durum</th><th></th></tr></thead>'+
+    '<tbody>'+satir+'</tbody></table></div></div></div>';
+}
+
+/* Formdaki hedefleri okuyup kaydeder. */
+function tebligKaydet(sessiz){
+  var S=SEC;
+  var t=tebligBul(S.yil,S.ay,S.marka,S.rol,S.danisman)||tebligYeni(S.yil,S.ay,S.marka,S.rol,S.danisman);
+  var ms=metrikSeti(S.marka,S.rol), yeni=[];
+  ms.forEach(function(m){
+    var inp=document.querySelector('.t-h[data-k="'+m.key+'"]');
+    var v=inp?inp.value:'';
+    if(m.tip==='varyok')yeni.push({key:m.key,hedef:v||null});
+    else yeni.push({key:m.key,hedef:(v===''?null:toNum(v))});
+  });
+  t.metrikler=yeni;
+  t.unvan=(kadroBul(S.danisman,S.marka)||{}).unvan||t.unvan;
+  t.yoneticiAd=markaMudur(S.marka);
+  t.guncelleme=new Date().toISOString();
+  tebligYaz(t);
+  if(!sessiz)toast('✓ Hedefler kaydedildi.');
+  return t;
+}
+
+/* ============================================================================
+   2. ADIM — AYLIK KARNE
+   Hedefler, aynı döneme ait Hedef Tebliğ formundan otomatik gelir; müdür yalnız
+   gerçekleşen değerleri girer. Başarı oranı ve durum canlı hesaplanır.
+   ========================================================================== */
+
+/* Şube/takım ortalaması: aynı dönem + marka + roldeki diğer karnelerde o
+   metriğe girilmiş gerçekleşen değerlerin ortalaması. */
+function subeOrtalama(yil,ay,marka,rol,key,haricDan){
+  var top=0,adet=0;
+  KARNELER.forEach(function(k){
+    if(k.yil!==yil||k.ay!==ay||k.marka!==marka||k.rol!==rol)return;
+    if(haricDan&&k.danisman===haricDan)return;
+    (k.metrikler||[]).forEach(function(r){
+      if(r.key!==key)return;
+      var v=toNum(r.gerceklesen);
+      if(v!=null){top+=v;adet++;}
+    });
+  });
+  return adet?top/adet:null;
+}
+
+function karneYeni(yil,ay,marka,rol,dan){
+  var kisi=kadroBul(dan,marka)||{};
+  var t=tebligBul(yil,ay,marka,rol,dan);
+  var hedefMap={};
+  if(t)(t.metrikler||[]).forEach(function(r){hedefMap[r.key]=r.hedef;});
+  return {
+    id:kayitId(yil,ay,marka,rol,dan),
+    yil:yil, ay:ay, marka:marka, rol:rol, danisman:dan,
+    unvan:kisi.unvan||'', yoneticiAd:markaMudur(marka),
+    metrikler:metrikSeti(marka,rol).map(function(m){
+      return {key:m.key, hedef:(hedefMap[m.key]!=null?hedefMap[m.key]:(m.vh==null?null:m.vh)),
+              gerceklesen:null, subeOrt:null, durum:''};
+    }),
+    gelisimPlani:'', durum:'taslak', guncelleme:null,
+    kesinlesmeTarihi:null, ciktiTarihi:null, ikGonderildi:false, gbTarihi:null
+  };
+}
+
+function viewKarne(){
+  var S=SECK, h=adimSeridi(2)+secimCubugu('K',S);
+  if(!S.danisman){
+    h+='<div class="card"><div class="empty"><b>Danışman seçiniz</b>'+
+       'Yukarıdan bir servis danışmanı seçtiğinizde '+esc(AYLAR[S.ay-1])+' '+S.yil+
+       ' dönemi karnesi açılacaktır.</div></div>';
+    return h+karneDonemListesi();
+  }
+  var kisi=kadroBul(S.danisman,S.marka);
+  if(!kisi)return h+'<div class="card"><div class="empty"><b>Kayıt bulunamadı</b>Seçilen danışman kadroda yok.</div></div>';
+  S.rol=kisi.rol;
+
+  var t=tebligBul(S.yil,S.ay,S.marka,S.rol,S.danisman);
+  var k=karneBul(S.yil,S.ay,S.marka,S.rol,S.danisman)||karneYeni(S.yil,S.ay,S.marka,S.rol,S.danisman);
+  var ms=metrikSeti(S.marka,S.rol);
+  var rMap={}; (k.metrikler||[]).forEach(function(r){rMap[r.key]=r;});
+
+  var kesin=(k.durum==='kesinlesen');
+  var kilitli=kesin&&SES.rol!=='admin';
+  var ozet=karneOzet(k);
+
+  /* Uyarı şeritleri */
+  var uyari='';
+  if(!t||!t.guncelleme){
+    uyari+='<div class="note warn"><b>Bu dönem için hedef tebliğ formu bulunamadı.</b><br>'+
+      'Karnenin hedef sütunu boş gelir. Önce <b>1 · Hedef Tebliğ</b> sekmesinden hedefleri girip '+
+      'çalışana tebliğ etmeniz gerekir. Yine de devam edebilirsiniz; hedefleri elle yazabilirsiniz.</div>';
+  }else if(!t.tebligEdildi){
+    uyari+='<div class="note">Hedefler <b>'+isoTarihTR(t.guncelleme)+'</b> tarihli tebliğ formundan alınmıştır. '+
+      'Form henüz "Tebliğ Edildi" olarak işaretlenmemiş.</div>';
+  }
+  if(kilitli){
+    uyari+='<div class="note warn">Bu karne kesinleştirilmiştir ve kilitlenmiştir. Düzeltme için İnsan Kaynakları ile görüşünüz.</div>';
+  }
+
+  var rz=kesin
+    ? '<span class="badge b-ok">✓ Kesinleşti</span> '
+    : (k.guncelleme?'<span class="badge b-warn">Taslak</span> ':'<span class="badge b-mut">Yeni Karne</span> ');
+  if(k.ikGonderildi)rz+='<span class="badge b-info">İK\'ya Gönderildi</span> ';
+  if(ozet.yetersiz>0)rz+='<span class="badge b-bad">'+ozet.yetersiz+' metrikte yetersiz</span> ';
+
+  function satirlar(list){
+    return list.map(function(m){
+      var r=rMap[m.key]||{key:m.key,hedef:null,gerceklesen:null,subeOrt:null,durum:''};
+      var so=subeOrtalama(S.yil,S.ay,S.marka,S.rol,m.key,S.danisman);
+      var hedefGiris=(m.tip==='varyok')
+        ? '<span class="mtr-hedef-info">YOK olmalı</span>'
+        : '<input class="mtr-in k-hd" data-k="'+m.key+'" inputmode="decimal" value="'+
+          (r.hedef==null?'':esc(r.hedef))+'" placeholder="—"'+(kilitli?' readonly':'')+'>';
+      var gercGiris=(m.tip==='varyok')
+        ? '<select class="mtr-sel k-gr" data-k="'+m.key+'"'+(kilitli?' disabled':'')+'>'+
+          ['','YOK','VAR'].map(function(o){
+            return '<option value="'+o+'"'+((r.gerceklesen||'')===o?' selected':'')+'>'+(o||'—')+'</option>';}).join('')+
+          '</select>'
+        : '<input class="mtr-in k-gr" data-k="'+m.key+'" inputmode="decimal" value="'+
+          (r.gerceklesen==null?'':esc(r.gerceklesen))+'" placeholder="—"'+(kilitli?' readonly':'')+'>';
+      var durumSel='<select class="mtr-sel k-dr" data-k="'+m.key+'"'+(kilitli?' disabled':'')+'>'+
+        ['','Başarılı','Yetersiz','Etkisi Yok'].map(function(o){
+          return '<option value="'+o+'"'+((r.durum||'')===o?' selected':'')+'>'+(o||'Seçiniz')+'</option>';}).join('')+
+        '</select>';
+      return '<tr data-row="'+m.key+'">'+
+        '<td><span class="mtr-ad">'+esc(m.ad)+'</span>'+
+          (m.not?'<span class="mtr-not">'+esc(m.not)+'</span>':'')+
+          '<span class="mtr-not">Eşik: min. %'+Math.round((m.esik==null?1:m.esik)*100)+
+          (m.yon==='dusuk'?' · düşük olması iyi':'')+'</span></td>'+
+        '<td class="num">'+hedefGiris+'</td>'+
+        '<td class="num">'+gercGiris+'</td>'+
+        '<td class="num" data-cell="oran">'+oranRozet(m,r)+'</td>'+
+        '<td class="num" data-cell="ort">'+(so==null?'—':fmtSayi(Math.round(so*100)/100))+'</td>'+
+        '<td>'+durumSel+'</td></tr>';
+    }).join('');
+  }
+  var gA=ms.filter(function(m){return m.grup==='A';}), gB=ms.filter(function(m){return m.grup!=='A';});
+  var tbody='';
+  if(gA.length)tbody+='<tr class="grp-row"><td colspan="6">A) Verimlilik ve Ciro</td></tr>'+satirlar(gA);
+  if(gB.length)tbody+='<tr class="grp-row"><td colspan="6">B) Müşteri Deneyimi ve Kalite</td></tr>'+satirlar(gB);
+
+  h+=uyari+
+    '<div class="kpis">'+
+      '<div class="kpi'+(ozet.yetersiz?' bad':' ok')+'"><div class="kpi-l">Değerlendirilen Metrik</div>'+
+        '<div class="kpi-v">'+ozet.toplam+'</div><div class="kpi-s">'+ms.length+' metrik tanımlı</div></div>'+
+      '<div class="kpi ok"><div class="kpi-l">Başarılı</div><div class="kpi-v">'+ozet.basarili+'</div>'+
+        '<div class="kpi-s">'+(ozet.oran==null?'—':fmtYuzde(ozet.oran)+' başarı')+'</div></div>'+
+      '<div class="kpi'+(ozet.yetersiz?' bad':'')+'"><div class="kpi-l">Yetersiz</div>'+
+        '<div class="kpi-v">'+ozet.yetersiz+'</div>'+
+        '<div class="kpi-s">'+(ozet.yetersiz?'Geri bildirim gerekir':'Geri bildirim gerekmez')+'</div></div>'+
+      '<div class="kpi gold"><div class="kpi-l">Dönem</div>'+
+        '<div class="kpi-v" style="font-size:19px">'+esc(AYLAR[S.ay-1])+'</div>'+
+        '<div class="kpi-s">'+S.yil+' · '+esc(markaAd(S.marka))+'</div></div>'+
+    '</div>'+
+    '<div class="card">'+
+    '<div class="card-h"><h3>Aylık Performans Karnesi</h3>'+
+      '<span class="sub">'+esc(S.danisman)+' · '+esc(kisi.unvan)+' · '+esc(rolAd(S.rol))+'</span>'+
+      '<div style="flex:1"></div>'+rz+'</div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+      '<thead><tr><th style="min-width:270px">Performans Metriği</th>'+
+      '<th class="num" style="width:130px">Aylık Hedef</th>'+
+      '<th class="num" style="width:130px">Gerçekleşen</th>'+
+      '<th class="num" style="width:110px">Başarı Oranı</th>'+
+      '<th class="num" style="width:110px">Şube Ort.</th>'+
+      '<th style="width:130px">Durum</th></tr></thead>'+
+      '<tbody>'+tbody+'</tbody></table></div></div>'+
+    '<div class="card-b" style="border-top:1px solid var(--grid)">'+
+      '<label style="font-size:11px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">'+
+        'B. Yönetici Değerlendirmesi ve Gelişim Aksiyon Planı</label>'+
+      '<div style="font-size:11.5px;color:var(--muted);font-style:italic;margin-bottom:8px">'+
+        '"Yetersiz" işaretlenen metriklerin kök nedenleri, saha gözlemleri ve önümüzdeki dönem için '+
+        'çalışana sağlanacak gelişim/eğitim aksiyonları somut olarak yazılmalıdır. Boş bırakılamaz.</div>'+
+      '<textarea id="kPlan" rows="4" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;'+
+        'font-size:13.5px;line-height:1.5;resize:vertical"'+(kilitli?' readonly':'')+'>'+esc(k.gelisimPlani||'')+'</textarea>'+
+    '</div>'+
+    '<div class="card-b" style="border-top:1px solid var(--grid);display:flex;gap:10px;flex-wrap:wrap;align-items:center">'+
+      (kilitli?'':'<button class="btn dark" id="kKaydet">Karneyi Kaydet</button>')+
+      (kilitli?'':'<button class="btn" id="kOtoDurum">⟳ Durumları Otomatik Hesapla</button>')+
+      (kesin?'':'<button class="btn gold" id="kKesin">🔒 Karneyi Kesinleştir</button>')+
+      '<button class="btn" id="kYazdir">🖨 Karneyi Yazdır / PDF</button>'+
+      (k.ikGonderildi?'':'<button class="btn" id="kIK">📤 İK\'ya Gönderildi İşaretle</button>')+
+      (ozet.yetersiz>0?'<button class="btn danger" id="kGB">⚠ Geri Bildirim Formu</button>':'')+
+      '<div style="flex:1"></div>'+
+      '<span style="font-size:11.5px;color:var(--muted)">'+
+        (kesin?'Kesinleşme: '+isoTarihTR(k.kesinlesmeTarihi):
+         (k.guncelleme?'Son kayıt: '+isoTarihTR(k.guncelleme):'Henüz kaydedilmedi'))+'</span>'+
+    '</div></div>';
+
+  return h+karneDonemListesi();
+}
+
+function karneDonemListesi(){
+  var S=SECK, satir='';
+  kadroListe(S.marka,'',false).forEach(function(kk){
+    var k=karneBul(S.yil,S.ay,S.marka,kk.rol,kk.ad);
+    var durum,cls,oz={toplam:0,basarili:0,yetersiz:0,oran:null};
+    if(!k||!k.guncelleme){durum='Girilmedi';cls='b-mut';}
+    else{
+      oz=karneOzet(k);
+      if(k.durum==='kesinlesen'){durum=k.ikGonderildi?'İK\'da':'Kesinleşti';cls='b-ok';}
+      else {durum='Taslak';cls='b-warn';}
+    }
+    satir+='<tr><td><b>'+esc(kk.ad)+'</b></td>'+
+      '<td>'+esc(rolAd(kk.rol))+'</td>'+
+      '<td class="num">'+(oz.toplam||'—')+'</td>'+
+      '<td class="num">'+(oz.oran==null?'—':'<span class="badge '+(oz.yetersiz?'b-warn':'b-ok')+'">'+fmtYuzde(oz.oran)+'</span>')+'</td>'+
+      '<td class="num">'+(oz.yetersiz?'<span class="badge b-bad">'+oz.yetersiz+'</span>':'—')+'</td>'+
+      '<td><span class="badge '+cls+'">'+durum+'</span></td>'+
+      '<td><button class="btn-sm" data-git-k="'+esc(kk.ad)+'">Aç</button></td></tr>';
+  });
+  if(!satir)return '';
+  return '<div class="card"><div class="card-h"><h3>Dönem Durumu</h3>'+
+    '<span class="sub">'+esc(AYLAR[SECK.ay-1])+' '+SECK.yil+' · '+esc(markaAd(SECK.marka))+'</span></div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+    '<thead><tr><th>Danışman</th><th>Karne Tipi</th><th class="num">Değerlendirilen</th>'+
+    '<th class="num">Başarı</th><th class="num">Yetersiz</th><th>Durum</th><th></th></tr></thead>'+
+    '<tbody>'+satir+'</tbody></table></div></div></div>';
+}
+
+/* Formdaki alanları okuyup karneyi kaydeder. otoDurum=true ise boş bırakılmış
+   durum hücrelerini hesaplanan değerle doldurur. */
+function karneOku(otoDurum){
+  var S=SECK;
+  var k=karneBul(S.yil,S.ay,S.marka,S.rol,S.danisman)||karneYeni(S.yil,S.ay,S.marka,S.rol,S.danisman);
+  var ms=metrikSeti(S.marka,S.rol), yeni=[];
+  ms.forEach(function(m){
+    var hd=document.querySelector('.k-hd[data-k="'+m.key+'"]');
+    var gr=document.querySelector('.k-gr[data-k="'+m.key+'"]');
+    var dr=document.querySelector('.k-dr[data-k="'+m.key+'"]');
+    var r={key:m.key,
+      hedef:(m.tip==='varyok')?'VAR / YOK':(hd&&hd.value!==''?toNum(hd.value):null),
+      gerceklesen:(m.tip==='varyok')?(gr?gr.value||null:null):(gr&&gr.value!==''?toNum(gr.value):null),
+      subeOrt:null, durum:(dr?dr.value:'')};
+    r.subeOrt=subeOrtalama(S.yil,S.ay,S.marka,S.rol,m.key,S.danisman);
+    if(r.subeOrt!=null)r.subeOrt=Math.round(r.subeOrt*100)/100;
+    if(otoDurum||!r.durum){
+      var oneri=durumOner(m,r);
+      if(oneri)r.durum=oneri;
+    }
+    yeni.push(r);
+  });
+  k.metrikler=yeni;
+  var pl=elId('kPlan'); if(pl)k.gelisimPlani=pl.value;
+  k.unvan=(kadroBul(S.danisman,S.marka)||{}).unvan||k.unvan;
+  k.yoneticiAd=markaMudur(S.marka);
+  k.guncelleme=new Date().toISOString();
+  return k;
+}
+
+/* ============================================================================
+   RESMİ ÇIKTILAR — imzalatılmak üzere yazdırılan formlar
+   ========================================================================== */
+function ciktiCss(){
+  return '<style>'+
+  '@page{size:A4;margin:14mm 13mm}'+
+  'body{font-family:Arial,Helvetica,sans-serif;color:#111;font-size:11.5px;line-height:1.45;padding:0;margin:0}'+
+  '.hdr{border-bottom:2.5px solid #16324e;padding-bottom:9px;margin-bottom:14px}'+
+  '.hdr h1{font-size:14px;margin:0 0 3px;letter-spacing:.01em}'+
+  '.hdr h2{font-size:11.5px;font-weight:600;color:#16324e;margin:0;letter-spacing:.04em;text-transform:uppercase}'+
+  '.meta{display:grid;grid-template-columns:1fr 1fr;gap:3px 22px;margin-bottom:13px;font-size:11.5px}'+
+  '.meta b{display:inline-block;min-width:132px}'+
+  'table{width:100%;border-collapse:collapse;margin:10px 0;font-size:10.5px}'+
+  'th,td{border:1px solid #8c8c8c;padding:4.5px 6px;text-align:left;vertical-align:top}'+
+  'th{background:#e8ebee;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.03em}'+
+  'td.n{text-align:right;white-space:nowrap}'+
+  'tr.grp td{background:#f2f4f6;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#16324e}'+
+  '.knot{display:block;font-size:9px;color:#666;font-style:italic;margin-top:1px}'+
+  'h3{font-size:11.5px;margin:15px 0 3px}'+
+  '.alt{font-size:9.5px;color:#555;font-style:italic;margin:0 0 5px}'+
+  '.kutu{border:1px solid #8c8c8c;padding:8px;min-height:62px;white-space:pre-wrap}'+
+  '.beyan{border:1px solid #8c8c8c;min-height:96px;'+
+    'background-image:repeating-linear-gradient(#fff 0,#fff 25px,#d5d5d5 26px);background-position:0 7px}'+
+  '.hukuki{font-size:9px;color:#333;border:1px solid #c9c9c9;background:#f7f7f7;padding:7px 9px;margin-top:15px;line-height:1.5}'+
+  '.imza{display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:26px}'+
+  '.imza div{border-top:1px solid #333;padding-top:5px;text-align:center;font-size:10.5px}'+
+  'p{margin:0 0 10px;text-align:justify}'+
+  '.ozet{display:flex;gap:16px;margin:10px 0;font-size:10.5px}'+
+  '.ozet span{border:1px solid #c9c9c9;background:#f7f7f7;padding:4px 10px;border-radius:3px}'+
+  '@media print{.noprint{display:none}}'+
+  '.noprint{position:fixed;top:8px;right:8px;background:#16324e;color:#fff;border:0;padding:8px 14px;'+
+    'border-radius:6px;font-size:12px;cursor:pointer;font-family:Arial,sans-serif}'+
+  '</style>';
+}
+function ciktiBaslik(alt){
+  return '<div class="hdr"><h1>İNCİROĞLU OTOMOTİV SAN. TİC. A.Ş.</h1><h2>'+esc(alt)+'</h2></div>';
+}
+function ciktiYazdirBtn(){
+  return '<button class="noprint" onclick="window.print()">🖨 Yazdır</button>';
+}
+var HUKUKI='<div class="hukuki"><b>HUKUKİ BİLDİRİM:</b> İşbu form, iş sözleşmesinden doğan iş görme '+
+  'borcunuzun verimlilik, nicelik ve objektif standartlar yönünden takibi, değerlendirilmesi ve 4857 sayılı '+
+  'İş Kanunu tahtında tarafların karşılıklı hak ve yükümlülüklerinin tespiti amacıyla yasal mevzuata uygun '+
+  'olarak tanzim edilmiştir.</div>';
+
+/* ---------- 1. HEDEF TEBLİĞ FORMU ---------- */
+function tebligCiktiHtml(t){
+  var ms=metrikSeti(t.marka,t.rol), hMap={};
+  (t.metrikler||[]).forEach(function(r){hMap[r.key]=r.hedef;});
+  function sat(list){
+    return list.map(function(m){
+      var hv=hMap[m.key];
+      var hedefTxt=(m.tip==='varyok')?(hv||'VAR / YOK'):(hv==null?'—':fmtSayi(hv));
+      return '<tr><td>'+esc(m.ad)+(m.not?'<span class="knot">'+esc(m.not)+'</span>':'')+'</td>'+
+        '<td class="n">'+esc(hedefTxt)+'</td></tr>';
+    }).join('');
+  }
+  var gA=ms.filter(function(m){return m.grup==='A';}), gB=ms.filter(function(m){return m.grup!=='A';});
+  var rows='';
+  if(gA.length)rows+='<tr class="grp"><td colspan="2">A) Verimlilik ve Ciro</td></tr>'+sat(gA);
+  if(gB.length)rows+='<tr class="grp"><td colspan="2">B) Müşteri Deneyimi ve Kalite</td></tr>'+sat(gB);
+
+  return '<!doctype html><html lang="tr"><head><meta charset="utf-8">'+
+    '<title>Hedef Tebliğ Formu — '+esc(t.danisman)+'</title>'+ciktiCss()+'</head><body>'+
+    ciktiYazdirBtn()+
+    ciktiBaslik('Servis Danışmanı Aylık Hedef Tebliğ Formu')+
+    '<div class="meta">'+
+      '<div><b>Dönem (Ay/Yıl):</b> '+esc(AYLAR[t.ay-1])+' / '+t.yil+'</div>'+
+      '<div><b>Marka / Şube:</b> '+esc(markaAd(t.marka))+'</div>'+
+      '<div><b>Adı Soyadı:</b> '+esc(t.danisman)+'</div>'+
+      '<div><b>Unvanı:</b> '+esc(t.unvan||'Servis Danışmanı')+'</div>'+
+      '<div><b>Yöneticisi:</b> '+esc(t.yoneticiAd||'')+'</div>'+
+      '<div><b>Karne Tipi:</b> '+esc(rolAd(t.rol))+'</div>'+
+    '</div>'+
+    '<p>Aşağıdaki tabloda '+esc(AYLAR[t.ay-1])+' '+t.yil+' dönemi için tarafınıza tanımlanan aylık performans '+
+    'hedefleri yer almaktadır. Dönem sonunda gerçekleşen değerleriniz bu hedeflerle karşılaştırılarak '+
+    'aylık performans karneniz düzenlenecektir.</p>'+
+    '<table><thead><tr><th style="width:72%">Performans Metriği</th>'+
+    '<th style="width:28%">Aylık Hedef</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<h3>Çalışanın Beyanı</h3>'+
+    '<div class="alt">(Hedeflere ilişkin görüş, itiraz veya talepleriniz varsa bu alana yazınız.)</div>'+
+    '<div class="beyan"></div>'+
+    HUKUKI+
+    '<div class="imza"><div>Yönetici ('+esc(markaAd(t.marka))+' Servis Müdürü)<br>'+esc(t.yoneticiAd||'')+'<br>İmza / Tarih</div>'+
+    '<div>Çalışan ('+esc(t.unvan||'Servis Danışmanı')+')<br>'+esc(t.danisman)+'<br>İmza / Tarih</div></div>'+
+    '</body></html>';
+}
+
+/* ---------- 2. AYLIK PERFORMANS KARNESİ ---------- */
+function karneCiktiHtml(k){
+  var ms=metrikSeti(k.marka,k.rol), rMap={};
+  (k.metrikler||[]).forEach(function(r){rMap[r.key]=r;});
+  function sat(list){
+    return list.map(function(m){
+      var r=rMap[m.key]||{};
+      var isaret=(r.durum==='Yetersiz')?'☒':'☐';
+      var hedefTxt,gercTxt,oranTxt;
+      if(m.tip==='varyok'){
+        hedefTxt='YOK'; gercTxt=r.gerceklesen||'—'; oranTxt='—';
+      }else{
+        hedefTxt=(r.hedef==null?'—':fmtSayi(r.hedef));
+        gercTxt=(r.gerceklesen==null?'—':fmtSayi(r.gerceklesen));
+        var o=oranHesap(m,r.hedef,r.gerceklesen);
+        oranTxt=(o==null?'—':fmtYuzde(o));
+      }
+      return '<tr><td style="text-align:center;width:22px">'+isaret+'</td>'+
+        '<td>'+esc(m.ad)+(m.not?'<span class="knot">'+esc(m.not)+'</span>':'')+'</td>'+
+        '<td class="n">'+esc(hedefTxt)+'</td><td class="n">'+esc(gercTxt)+'</td>'+
+        '<td class="n">'+esc(oranTxt)+'</td>'+
+        '<td class="n">'+(r.subeOrt==null?'—':fmtSayi(r.subeOrt))+'</td>'+
+        '<td>'+esc(r.durum||'—')+'</td></tr>';
+    }).join('');
+  }
+  var gA=ms.filter(function(m){return m.grup==='A';}), gB=ms.filter(function(m){return m.grup!=='A';});
+  var rows='';
+  if(gA.length)rows+='<tr class="grp"><td colspan="7">A) Verimlilik ve Ciro</td></tr>'+sat(gA);
+  if(gB.length)rows+='<tr class="grp"><td colspan="7">B) Müşteri Deneyimi ve Kalite</td></tr>'+sat(gB);
+  var oz=karneOzet(k);
+
+  return '<!doctype html><html lang="tr"><head><meta charset="utf-8">'+
+    '<title>Performans Karnesi — '+esc(k.danisman)+'</title>'+ciktiCss()+'</head><body>'+
+    ciktiYazdirBtn()+
+    ciktiBaslik('Aylık Performans Değerlendirme Karnesi — Servis Danışmanı')+
+    '<div class="meta">'+
+      '<div><b>Dönem (Ay/Yıl):</b> '+esc(AYLAR[k.ay-1])+' / '+k.yil+'</div>'+
+      '<div><b>Marka / Şube:</b> '+esc(markaAd(k.marka))+'</div>'+
+      '<div><b>Adı Soyadı:</b> '+esc(k.danisman)+'</div>'+
+      '<div><b>Unvanı:</b> '+esc(k.unvan||'Servis Danışmanı')+'</div>'+
+      '<div><b>Yöneticisi:</b> '+esc(k.yoneticiAd||'')+'</div>'+
+      '<div><b>Karne Tipi:</b> '+esc(rolAd(k.rol))+'</div>'+
+    '</div>'+
+    '<div class="ozet"><span><b>Değerlendirilen metrik:</b> '+oz.toplam+'</span>'+
+      '<span><b>Başarılı:</b> '+oz.basarili+'</span>'+
+      '<span><b>Yetersiz:</b> '+oz.yetersiz+'</span>'+
+      '<span><b>Genel başarı:</b> '+(oz.oran==null?'—':fmtYuzde(oz.oran))+'</span></div>'+
+    '<table><thead><tr><th></th><th style="width:34%">Performans Metriği</th><th>Aylık Hedef</th>'+
+    '<th>Gerçekleşen</th><th>Başarı Oranı</th><th>Şube/Takım Ort.</th><th>Durum</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>'+
+    '<h3>B. Yönetici Değerlendirmesi ve Gelişim Aksiyon Planı</h3>'+
+    '<div class="alt">(Servis Müdürü tarafından, yukarıda "Yetersiz" olarak işaretlenen metriklerin kök nedenleri, '+
+    'saha gözlemleri ve önümüzdeki dönem için çalışana sağlanan gelişim/eğitim aksiyonları somut olarak '+
+    'yazılmalıdır. Boş bırakılamaz.)</div>'+
+    '<div class="kutu">'+esc(k.gelisimPlani||'')+'</div>'+
+    '<h3>C. Çalışanın Beyanı ve Görüşü</h3>'+
+    '<div class="alt">(4857 sayılı İş Kanunu uyarınca çalışanın performansa, hedeflere ve saha koşullarına dair '+
+    'kendi beyanını ve açıklamalarını el yazısıyla yazacağı alandır.)</div>'+
+    '<div class="beyan"></div>'+
+    HUKUKI+
+    '<div class="imza"><div>Yönetici ('+esc(markaAd(k.marka))+' Servis Müdürü)<br>'+esc(k.yoneticiAd||'')+'<br>İmza / Tarih</div>'+
+    '<div>Çalışan ('+esc(k.unvan||'Servis Danışmanı')+')<br>'+esc(k.danisman)+'<br>İmza / Tarih</div></div>'+
+    '</body></html>';
+}
+
+/* ---------- 3. PERFORMANS GERİ BİLDİRİM FORMU ---------- */
+function geriBildirimHtml(k){
+  var ms=metrikSeti(k.marka,k.rol), rMap={};
+  (k.metrikler||[]).forEach(function(r){rMap[r.key]=r;});
+  var yetersizler=ms.filter(function(m){
+    var r=rMap[m.key]; return r&&r.durum==='Yetersiz';});
+  var rows=yetersizler.map(function(m){
+    var r=rMap[m.key]||{};
+    var hedefTxt,gercTxt,oranTxt;
+    if(m.tip==='varyok'){hedefTxt='YOK';gercTxt=r.gerceklesen||'—';oranTxt='—';}
+    else{
+      hedefTxt=(r.hedef==null?'—':fmtSayi(r.hedef));
+      gercTxt=(r.gerceklesen==null?'—':fmtSayi(r.gerceklesen));
+      var o=oranHesap(m,r.hedef,r.gerceklesen);
+      oranTxt=(o==null?'—':fmtYuzde(o));
+    }
+    return '<tr><td style="text-align:center;width:22px">☒</td><td>'+esc(m.ad)+'</td>'+
+      '<td class="n">'+esc(hedefTxt)+'</td><td class="n">'+esc(gercTxt)+'</td>'+
+      '<td class="n">'+esc(oranTxt)+'</td><td class="n">'+(r.subeOrt==null?'—':fmtSayi(r.subeOrt))+'</td>'+
+      '<td>Yetersiz</td></tr>';
+  }).join('');
+  var tarih=k.kesinlesmeTarihi?isoTarihTR(k.kesinlesmeTarihi):bugunTR();
+
+  return '<!doctype html><html lang="tr"><head><meta charset="utf-8">'+
+    '<title>Performans Geri Bildirimi — '+esc(k.danisman)+'</title>'+ciktiCss()+'</head><body>'+
+    ciktiYazdirBtn()+
+    ciktiBaslik('Performans Geri Bildirim Süreci')+
+    '<div class="meta">'+
+      '<div><b>KİMDEN:</b> İnsan Kaynakları Direktörlüğü</div>'+
+      '<div><b>TARİH:</b> '+esc(tarih)+'</div>'+
+      '<div><b>KİME:</b> '+esc(k.danisman)+'</div>'+
+      '<div><b>KONU:</b> Performans Geri Bildirimi Hk.</div>'+
+    '</div>'+
+    '<p>Sayın '+esc(k.danisman)+',</p>'+
+    '<p>Şirketimiz bünyesinde <b>'+esc(k.unvan||'Servis Danışmanı')+'</b> olarak görev yaptığınız '+
+    esc(markaAd(k.marka))+' Servis Departmanında, ekteki performans karnesinde detayları yer alan '+
+    esc(AYLAR[k.ay-1])+' '+k.yil+' dönemine ait iş sonuçlarınız ve verimlilik metrikleriniz İnsan Kaynakları '+
+    've Satış Sonrası Hizmetler Direktörlüğü tarafından incelenmiştir.</p>'+
+    '<p>Yapılan objektif ölçüm ve değerlendirmeler neticesinde; görev tanımınızın ve işinizin doğasının '+
+    'vazgeçilmez birer unsuru ("olmazsa olmazı") olan aşağıdaki kriter(ler)de, adınıza tanımlanan ve '+
+    'dönem başında tarafınıza yazılı olarak tebliğ edilen aylık hedeflerin altında kaldığınız tespit edilmiştir:</p>'+
+    '<table><thead><tr><th></th><th style="width:34%">Performans Metriği</th><th>Aylık Hedef</th>'+
+    '<th>Gerçekleşen</th><th>Başarı Oranı</th><th>Şube/Takım Ort.</th><th>Durum</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>'+
+    '<p>Servis kabul süreçlerinde tarafınıza eşit şartlarda yönlendirilen iş emri ve müşteri hacmine rağmen '+
+    'yukarıda "Yetersiz" olarak işaretlenen veya şube/takım ortalamasının gerisinde kalan alanlardaki '+
+    'verimsizlik; iş görme borcunuzu sözleşmeye, işyeri kurallarına ve marka standartlarına uygun olarak '+
+    'yerine getirmediğinizi, bu durumun işyerinin normal işleyişini, müşteri memnuniyetini ve distribütör '+
+    'taahhütlerimizi sekteye uğrattığını ortaya koymaktadır.</p>'+
+    '<p>Şirketimizin iyi niyet kuralları ve <b>"Feshin Son Çare Olması"</b> hukuki ilkesi uyarınca, '+
+    'performansınızı şirket ve marka standartlarına yükseltmeniz, eksiklerinizi gidermeniz amacıyla tarafınıza '+
+    '<b>…….. ay</b> ek süre tanınmıştır. Bu gelişim sürecinde bağlı bulunduğunuz Servis Müdürlüğü tarafından '+
+    'desteklenecek, gerekli eğitim ve saha refakati sağlanacaktır.</p>'+
+    '<p>Tanınan bu gelişim süresi sonunda; yukarıda belirtilen eksikliklerin giderilmemesi, performansınızda '+
+    'somut, sürdürülebilir ve istikrarlı bir düzelme sağlanamaması ve hedeflerin yakalanamaması halinde; '+
+    'iş sözleşmenizin 4857 sayılı İş Kanunu\'nun 18. maddesi uyarınca geçerli nedenle feshedilebileceğini '+
+    'yasal olarak ihtar ve tebliğ ederiz.</p>'+
+    '<p>İşbu performansa dayalı yetersizlik tespitine ilişkin varsa yazılı savunma, beyan ve açıklamalarınızı '+
+    'yasal <b>3 (üç) iş günü</b> içerisinde İnsan Kaynakları Direktörlüğü\'ne teslim etmeniz gerekmektedir. '+
+    'Savunma sunmamanız halinde savunma hakkınızdan feragat etmiş sayılacağınız hususunu bildiririz.</p>'+
+    '<h3>Çalışanın Görüş ve Beyanı</h3>'+
+    '<div class="alt">(Çalışan, performans değerlendirmesine ilişkin görüşünü bu alana el yazısıyla yazar.)</div>'+
+    '<div class="beyan"></div>'+
+    '<p style="margin-top:18px">Saygılarımızla,<br><b>İnciroğlu Otomotiv San. Tic. A.Ş.</b><br>'+
+    'İnsan Kaynakları Direktörlüğü</p>'+
+    '<div class="imza">'+
+      '<div style="border-top:1px solid #333">TEBELLÜĞ EDEN ÇALIŞAN<br>'+esc(k.danisman)+
+        '<br><br>Tarih: ……… / ……… / 20………<br><br>İmza:</div>'+
+      '<div style="border-top:1px solid #333">İMTİNA TUTANAĞI (İmzadan kaçınırsa)<br>'+
+        'Muhatap tebellüğden ve imzadan imtina etmiştir.<br><br>'+
+        'Şahit 1 (Ad Soyad / İmza):<br><br>Şahit 2 (Ad Soyad / İmza):</div>'+
+    '</div>'+
+    '</body></html>';
+}
+
+/* ============================================================================
+   3. ADIM — GERİ BİLDİRİM TAKİP EKRANI
+   ========================================================================== */
+function viewGeriBildirim(){
+  var markalar=yetkiliMarkalar();
+  var liste=KARNELER.filter(function(k){
+    if(markalar.indexOf(k.marka)<0)return false;
+    return karneOzet(k).yetersiz>0;
+  }).sort(function(a,b){return (b.yil*100+b.ay)-(a.yil*100+a.ay);});
+
+  var h=adimSeridi(3);
+  h+='<div class="note">Bir çalışanın karnesinde <b>en az 1 metrik "Yetersiz"</b> çıktığında, o çalışan için '+
+     'performans geri bildirim süreci başlatılır. Aşağıdaki formu yazdırıp çalışana imzalatınız, görüş '+
+     'beyanını aldıktan sonra İnsan Kaynakları Direktörlüğü\'ne iletiniz.</div>';
+
+  if(!liste.length){
+    return h+'<div class="card"><div class="empty"><b>Geri bildirim gerektiren karne yok</b>'+
+      'Yetkili olduğunuz markalarda yetersizlik tespit edilen bir performans karnesi bulunmuyor.</div></div>';
+  }
+  var satir=liste.map(function(k){
+    var oz=karneOzet(k);
+    var durum=k.gbTarihi
+      ? '<span class="badge b-ok">✓ Form Alındı · '+isoTarihTR(k.gbTarihi)+'</span>'
+      : (k.durum==='kesinlesen'?'<span class="badge b-bad">Form Bekliyor</span>'
+                               :'<span class="badge b-warn">Karne Taslak</span>');
+    return '<tr><td><b>'+esc(k.danisman)+'</b><span class="mtr-not">'+esc(k.unvan||'')+'</span></td>'+
+      '<td>'+esc(markaAd(k.marka))+'</td>'+
+      '<td>'+esc(AYLAR[k.ay-1])+' '+k.yil+'</td>'+
+      '<td class="num"><span class="badge b-bad">'+oz.yetersiz+'</span></td>'+
+      '<td class="num">'+(oz.oran==null?'—':fmtYuzde(oz.oran))+'</td>'+
+      '<td>'+durum+'</td>'+
+      '<td style="white-space:nowrap">'+
+        '<button class="btn-sm" data-gb="'+esc(k.id)+'">📄 Formu Aç</button> '+
+        (k.gbTarihi?'':'<button class="btn-sm" data-gbok="'+esc(k.id)+'">✓ İmzalandı</button>')+
+      '</td></tr>';
+  }).join('');
+
+  return h+'<div class="card"><div class="card-h"><h3>Geri Bildirim Süreci Gereken Çalışanlar</h3>'+
+    '<span class="sub">'+liste.length+' kayıt</span></div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+    '<thead><tr><th>Çalışan</th><th>Marka</th><th>Dönem</th><th class="num">Yetersiz Metrik</th>'+
+    '<th class="num">Genel Başarı</th><th>Durum</th><th></th></tr></thead>'+
+    '<tbody>'+satir+'</tbody></table></div></div></div>';
+}
+
+/* ============================================================================
+   İK — GENEL BAKIŞ
+   ========================================================================== */
+function viewGenel(){
+  var yil=FLT.yil||new Date().getFullYear();
+  var ay=FLT.ay||(new Date().getMonth()===0?12:new Date().getMonth());
+  var markalar=aktifMarkalar();
+
+  var tTop=0,tEdilen=0,kTop=0,kKesin=0,yetersizKisi=0,danToplam=0;
+  var satir=markalar.map(function(mk){
+    var kadro=kadroListe(mk.kod,'',false);
+    danToplam+=kadro.length;
+    var tv=0,te=0,kv=0,kk=0,yz=0;
+    kadro.forEach(function(p){
+      var t=tebligBul(yil,ay,mk.kod,p.rol,p.ad);
+      if(t&&t.guncelleme){tv++; if(t.tebligEdildi)te++;}
+      var k=karneBul(yil,ay,mk.kod,p.rol,p.ad);
+      if(k&&k.guncelleme){kv++; if(k.durum==='kesinlesen')kk++;
+        if(karneOzet(k).yetersiz>0)yz++;}
+    });
+    tTop+=tv;tEdilen+=te;kTop+=kv;kKesin+=kk;yetersizKisi+=yz;
+    function bar(v,t){
+      var p=t?Math.round(v/t*100):0;
+      return '<div style="display:flex;align-items:center;gap:8px">'+
+        '<div style="flex:1;height:6px;background:var(--grid);border-radius:3px;overflow:hidden;min-width:60px">'+
+        '<div style="height:100%;width:'+p+'%;background:'+(p>=100?'var(--ok)':p>0?'var(--accent)':'transparent')+'"></div></div>'+
+        '<span style="font-size:11.5px;color:var(--muted);white-space:nowrap">'+v+'/'+t+'</span></div>';
+    }
+    return '<tr><td><b>'+esc(mk.ad)+'</b><span class="mtr-not">'+esc(mk.mudur||'— müdür atanmadı —')+'</span></td>'+
+      '<td class="num">'+kadro.length+'</td>'+
+      '<td style="min-width:130px">'+bar(tv,kadro.length)+'</td>'+
+      '<td style="min-width:130px">'+bar(te,kadro.length)+'</td>'+
+      '<td style="min-width:130px">'+bar(kv,kadro.length)+'</td>'+
+      '<td style="min-width:130px">'+bar(kk,kadro.length)+'</td>'+
+      '<td class="num">'+(yz?'<span class="badge b-bad">'+yz+'</span>':'—')+'</td></tr>';
+  }).join('');
+
+  var yillar=[];for(var y=new Date().getFullYear()+1;y>=2025;y--)yillar.push(y);
+
+  return '<div class="card"><div class="card-b"><div class="row">'+
+    '<div class="f"><label>Yıl</label><select id="gYil">'+
+      yillar.map(function(v){return '<option value="'+v+'"'+(yil===v?' selected':'')+'>'+v+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="f"><label>Ay</label><select id="gAy">'+
+      AYLAR.map(function(a,i){return '<option value="'+(i+1)+'"'+(ay===i+1?' selected':'')+'>'+a+'</option>';}).join('')+
+    '</select></div>'+
+    '<div style="flex:1"></div>'+
+    '<div class="f"><label>&nbsp;</label><button class="btn" id="gYedek">💾 Tüm Veriyi Yedekle (JSON)</button></div>'+
+    '</div></div></div>'+
+
+    '<div class="kpis">'+
+      '<div class="kpi"><div class="kpi-l">Kapsamdaki Danışman</div><div class="kpi-v">'+danToplam+'</div>'+
+        '<div class="kpi-s">'+markalar.length+' marka</div></div>'+
+      '<div class="kpi gold"><div class="kpi-l">Hedef Tebliğ Girildi</div><div class="kpi-v">'+tTop+'</div>'+
+        '<div class="kpi-s">'+tEdilen+' tanesi tebliğ edildi</div></div>'+
+      '<div class="kpi ok"><div class="kpi-l">Karne Girildi</div><div class="kpi-v">'+kTop+'</div>'+
+        '<div class="kpi-s">'+kKesin+' tanesi kesinleşti</div></div>'+
+      '<div class="kpi'+(yetersizKisi?' bad':'')+'"><div class="kpi-l">Geri Bildirim Gereken</div>'+
+        '<div class="kpi-v">'+yetersizKisi+'</div><div class="kpi-s">çalışan</div></div>'+
+    '</div>'+
+
+    '<div class="card"><div class="card-h"><h3>Marka Bazında Süreç Takibi</h3>'+
+      '<span class="sub">'+esc(AYLAR[ay-1])+' '+yil+'</span></div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+      '<thead><tr><th>Marka / Servis Müdürü</th><th class="num">Danışman</th>'+
+      '<th>Hedef Girildi</th><th>Tebliğ Edildi</th><th>Karne Girildi</th><th>Kesinleşti</th>'+
+      '<th class="num">Yetersiz</th></tr></thead><tbody>'+satir+'</tbody></table></div></div></div>';
+}
+
+/* ============================================================================
+   İK — METRİK YÖNETİMİ
+   ========================================================================== */
+var MSEC={marka:'',rol:''};
+function viewMetrik(){
+  var markalar=aktifMarkalar();
+  if(!MSEC.marka)MSEC.marka=markalar[0]?markalar[0].kod:'';
+  var roller=markaRolleri(MSEC.marka);
+  if(roller.indexOf(MSEC.rol)<0)MSEC.rol=roller[0]||'mekanik';
+  var ms=metrikSeti(MSEC.marka,MSEC.rol);
+
+  var satir=ms.map(function(m,i){
+    return '<tr data-mi="'+i+'">'+
+      '<td><input class="m-ad" value="'+esc(m.ad)+'" style="width:100%;min-width:230px;padding:6px 9px;border:1px solid var(--line);border-radius:6px"></td>'+
+      '<td><select class="m-grup mtr-sel">'+
+        [['A','A) Verimlilik ve Ciro'],['B','B) Müşteri Deneyimi']].map(function(o){
+          return '<option value="'+o[0]+'"'+((m.grup||'A')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+
+      '</select></td>'+
+      '<td><select class="m-tip mtr-sel">'+
+        [['sayi','Adet / Tutar'],['oran','Yüzde / Puan'],['varyok','VAR / YOK']].map(function(o){
+          return '<option value="'+o[0]+'"'+(m.tip===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+
+      '</select></td>'+
+      '<td><select class="m-yon mtr-sel">'+
+        [['yuksek','Yüksek iyi'],['dusuk','Düşük iyi']].map(function(o){
+          return '<option value="'+o[0]+'"'+((m.yon||'yuksek')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+
+      '</select></td>'+
+      '<td class="num"><input class="m-esik mtr-in" value="'+Math.round((m.esik==null?1:m.esik)*100)+'" style="max-width:78px"> <span style="font-size:11px;color:var(--muted)">%</span></td>'+
+      '<td class="num"><input class="m-vh mtr-in" value="'+(m.vh==null?'':esc(m.vh))+'" placeholder="—" style="max-width:110px"></td>'+
+      '<td><input class="m-not" value="'+esc(m.not||'')+'" placeholder="açıklama…" style="width:100%;min-width:180px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-size:12px"></td>'+
+      '<td style="white-space:nowrap">'+
+        '<button class="btn-sm" data-myuk="'+i+'" title="Yukarı taşı">↑</button> '+
+        '<button class="btn-sm" data-masa="'+i+'" title="Aşağı taşı">↓</button> '+
+        '<button class="btn-sm" data-msil="'+i+'" title="Metriği sil" style="color:var(--bad)">✕</button>'+
+      '</td></tr>';
+  }).join('');
+
+  return '<div class="note">Buradaki değişiklikler <b>yeni oluşturulacak</b> tebliğ ve karneleri etkiler; '+
+    'daha önce kaydedilmiş formlar olduğu gibi kalır. Eşik, o metriğin başarılı sayılması için gereken '+
+    'asgari gerçekleşme oranıdır (Excel\'de oran yazmayan metrikler için %100 kabul edilmiştir).</div>'+
+
+    '<div class="card"><div class="card-b"><div class="row">'+
+      '<div class="f"><label>Marka</label><select id="mMarka">'+
+        markalar.map(function(mk){return '<option value="'+mk.kod+'"'+(MSEC.marka===mk.kod?' selected':'')+'>'+esc(mk.ad)+'</option>';}).join('')+
+      '</select></div>'+
+      '<div class="f"><label>Karne Tipi</label><select id="mRol">'+
+        roller.map(function(r){return '<option value="'+r+'"'+(MSEC.rol===r?' selected':'')+'>'+esc(rolAd(r))+'</option>';}).join('')+
+      '</select></div>'+
+      '<div style="flex:1"></div>'+
+      '<div class="f"><label>&nbsp;</label><button class="btn" id="mEkle">+ Metrik Ekle</button></div>'+
+      '<div class="f"><label>&nbsp;</label><button class="btn dark" id="mKaydet">Değişiklikleri Kaydet</button></div>'+
+    '</div></div></div>'+
+
+    '<div class="card"><div class="card-h"><h3>'+esc(markaAd(MSEC.marka))+' · '+esc(rolAd(MSEC.rol))+'</h3>'+
+      '<span class="sub">'+ms.length+' metrik</span></div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+      '<thead><tr><th>Metrik Adı</th><th>Bölüm</th><th>Tip</th><th>Yön</th><th class="num">Eşik</th>'+
+      '<th class="num">Varsayılan Hedef</th><th>Açıklama</th><th></th></tr></thead>'+
+      '<tbody>'+(satir||'<tr><td colspan="8" class="empty">Bu karne tipinde metrik tanımlı değil.</td></tr>')+
+    '</tbody></table></div></div></div>';
+}
+function metrikOku(){
+  var yeni=[], ms=metrikSeti(MSEC.marka,MSEC.rol);
+  Array.prototype.forEach.call(document.querySelectorAll('tr[data-mi]'),function(tr){
+    var i=Number(tr.dataset.mi), eski=ms[i]||{};
+    var ad=tr.querySelector('.m-ad').value.trim();
+    if(!ad)return;
+    var esik=toNum(tr.querySelector('.m-esik').value);
+    var vh=tr.querySelector('.m-vh').value.trim();
+    yeni.push({
+      key:eski.key||('m_'+slug(ad)+'_'+Math.random().toString(36).slice(2,6)),
+      ad:ad,
+      grup:tr.querySelector('.m-grup').value,
+      tip:tr.querySelector('.m-tip').value,
+      yon:tr.querySelector('.m-yon').value,
+      esik:(esik==null?1:esik/100),
+      vh:(vh===''?null:toNum(vh)),
+      not:tr.querySelector('.m-not').value.trim()
+    });
+  });
+  return yeni;
+}
+
+/* ============================================================================
+   İK — KADRO ve KULLANICILAR
+   ========================================================================== */
+function viewKadro(){
+  var markalar=WORK.markalar||[];
+  var satir=(WORK.kadro||[]).map(function(k,i){
+    var roller=(markaBul(k.marka)||{roller:['mekanik']}).roller||['mekanik'];
+    return '<tr data-ki="'+i+'"'+(k.aktif===false?' style="opacity:.55"':'')+'>'+
+      '<td><input class="k-ad" value="'+esc(k.ad)+'" style="width:100%;min-width:170px;padding:6px 9px;border:1px solid var(--line);border-radius:6px"></td>'+
+      '<td><input class="k-unvan" value="'+esc(k.unvan||'')+'" style="width:100%;min-width:160px;padding:6px 9px;border:1px solid var(--line);border-radius:6px"></td>'+
+      '<td><select class="k-marka mtr-sel">'+
+        markalar.map(function(m){return '<option value="'+m.kod+'"'+(k.marka===m.kod?' selected':'')+'>'+esc(m.ad)+'</option>';}).join('')+
+      '</select></td>'+
+      '<td><select class="k-rol mtr-sel">'+
+        roller.map(function(r){return '<option value="'+r+'"'+(k.rol===r?' selected':'')+'>'+esc(rolAd(r))+'</option>';}).join('')+
+      '</select></td>'+
+      '<td style="white-space:nowrap;font-size:12px;color:var(--muted)">'+esc(k.giris||'—')+'</td>'+
+      '<td><label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px">'+
+        '<input type="checkbox" class="k-aktif"'+(k.aktif!==false?' checked':'')+'> Karne alır</label></td>'+
+      '<td><button class="btn-sm" data-ksil="'+i+'" style="color:var(--bad)">✕</button></td></tr>';
+  }).join('');
+
+  var uSatir=(WORK.users||[]).map(function(u,i){
+    return '<tr><td><b>'+esc(u.kullanici)+'</b></td><td>'+esc(u.ad)+'</td>'+
+      '<td>'+(u.rol==='admin'?'<span class="badge b-gold">İnsan Kaynakları</span>':'<span class="badge b-info">Servis Müdürü</span>')+'</td>'+
+      '<td>'+esc(u.marka?markaAd(u.marka):'Tüm markalar')+'</td>'+
+      '<td><button class="btn-sm" data-usif="'+i+'">🔑 Şifre Belirle</button></td></tr>';
+  }).join('');
+
+  return '<div class="note">Kadroda <b>"Karne alır"</b> işareti kaldırılan çalışanlar sistemde kayıtlı kalır '+
+    'ama hedef tebliğ ve karne listelerinde görünmez. Hasar Departmanı ekibi ile PSA Garanti Uzman '+
+    'Yardımcıları, sizin talimatınız doğrultusunda şimdilik kapalıdır.</div>'+
+
+    '<div class="card"><div class="card-h"><h3>Servis Kadrosu</h3>'+
+      '<span class="sub">'+(WORK.kadro||[]).filter(function(k){return k.aktif!==false;}).length+' aktif · '+
+      (WORK.kadro||[]).length+' kayıt</span><div style="flex:1"></div>'+
+      '<button class="btn" id="kadEkle">+ Çalışan Ekle</button>'+
+      '<button class="btn dark" id="kadKaydet">Değişiklikleri Kaydet</button></div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+      '<thead><tr><th>Adı Soyadı</th><th>Unvanı</th><th>Marka</th><th>Karne Tipi</th>'+
+      '<th>İşe Giriş</th><th>Durum</th><th></th></tr></thead><tbody>'+satir+'</tbody></table></div></div></div>'+
+
+    '<div class="card"><div class="card-h"><h3>Kullanıcılar</h3>'+
+      '<span class="sub">Her servis müdürü yalnızca kendi markasının danışmanlarını görür</span></div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+      '<thead><tr><th>Kullanıcı Adı</th><th>Adı Soyadı</th><th>Yetki</th><th>Marka</th><th></th></tr></thead>'+
+      '<tbody>'+uSatir+'</tbody></table></div></div></div>';
+}
+function kadroOku(){
+  var yeni=[], eski=WORK.kadro||[];
+  Array.prototype.forEach.call(document.querySelectorAll('tr[data-ki]'),function(tr){
+    var i=Number(tr.dataset.ki), e=eski[i]||{};
+    var ad=tr.querySelector('.k-ad').value.trim();
+    if(!ad)return;
+    yeni.push({ad:ad,
+      unvan:tr.querySelector('.k-unvan').value.trim(),
+      marka:tr.querySelector('.k-marka').value,
+      rol:tr.querySelector('.k-rol').value,
+      giris:e.giris||'',
+      aktif:tr.querySelector('.k-aktif').checked});
+  });
+  return yeni;
+}
+
+/* ============================================================================
+   OLAY BAĞLAMA — her render sonrası çağrılır
+   ========================================================================== */
+function bagla(id,olay,fn){var e=elId(id); if(e)e[olay]=fn;}
+function baglaHepsi(sec,olay,fn){
+  Array.prototype.forEach.call(document.querySelectorAll(sec),function(e){e[olay]=function(ev){fn(e,ev);};});
+}
+
+/* Karnede bir satırın başarı oranını ve önerilen durumunu canlı günceller. */
+function karneSatirYenile(key){
+  var m=metrikSeti(SECK.marka,SECK.rol).find(function(x){return x.key===key;});
+  if(!m)return;
+  var hd=document.querySelector('.k-hd[data-k="'+key+'"]');
+  var gr=document.querySelector('.k-gr[data-k="'+key+'"]');
+  var dr=document.querySelector('.k-dr[data-k="'+key+'"]');
+  var r={key:key,
+    hedef:(m.tip==='varyok')?null:(hd?toNum(hd.value):null),
+    gerceklesen:(m.tip==='varyok')?(gr?gr.value:null):(gr?toNum(gr.value):null)};
+  var tr=document.querySelector('tr[data-row="'+key+'"]');
+  if(tr){var c=tr.querySelector('[data-cell="oran"]'); if(c)c.innerHTML=oranRozet(m,r);}
+  var oneri=durumOner(m,r);
+  if(dr&&oneri&&dr.value!=='Etkisi Yok')dr.value=oneri;
+}
+
+function baglaOlaylar(){
+  /* ---------- 1. HEDEF TEBLİĞ ---------- */
+  bagla('TYil','onchange',function(e){SEC.yil=Number(e.target.value);render();});
+  bagla('TAy','onchange',function(e){SEC.ay=Number(e.target.value);render();});
+  bagla('TMarka','onchange',function(e){SEC.marka=e.target.value;SEC.danisman='';render();});
+  bagla('TDan','onchange',function(e){SEC.danisman=e.target.value;render();});
+
+  bagla('tKaydet','onclick',function(){tebligKaydet();render();});
+  bagla('tYazdir','onclick',function(){
+    var t=tebligKaydet(true);
+    if(!t.ciktiTarihi){t.ciktiTarihi=new Date().toISOString();tebligYaz(t);}
+    yazdirAc(tebligCiktiHtml(t)); render();
+  });
+  bagla('tIK','onclick',function(){
+    var t=tebligKaydet(true);
+    t.ikGonderildi=true; if(!t.ciktiTarihi)t.ciktiTarihi=new Date().toISOString();
+    tebligYaz(t); toast('✓ İK\'ya gönderildi olarak işaretlendi.'); render();
+  });
+  bagla('tEdildi','onclick',function(){
+    var t=tebligBul(SEC.yil,SEC.ay,SEC.marka,SEC.rol,SEC.danisman); if(!t)return;
+    t.tebligEdildi=true; t.redMi=false; t.tebligTarihi=new Date().toISOString();
+    tebligYaz(t); toast('✓ Tebliğ edildi olarak kaydedildi.'); render();
+  });
+  bagla('tRed','onclick',function(){
+    var t=tebligBul(SEC.yil,SEC.ay,SEC.marka,SEC.rol,SEC.danisman); if(!t)return;
+    modalAc('Tebliğ Alınmadı',
+      '<p>Çalışan hedef tebliğ formunu imzalamaktan imtina etti ise, tutanak altına alınmak üzere '+
+      'kısa bir açıklama giriniz.</p>'+
+      '<div class="fld"><label>Açıklama / Tutanak Notu</label>'+
+      '<input id="redNot" value="'+esc(t.redNot||'')+'" placeholder="Örn: 12.08.2026 tarihinde iki şahit huzurunda imzadan imtina etti."></div>',
+      [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
+       {ad:'Kaydet',cls:'btn danger',fn:function(){
+         t.redMi=true; t.tebligEdildi=false; t.redNot=elId('redNot').value;
+         t.tebligTarihi=new Date().toISOString();
+         tebligYaz(t); modalKapat(); toast('Kaydedildi.'); render();
+       }}],true);
+  });
+  baglaHepsi('[data-git-t]','onclick',function(e){
+    SEC.danisman=e.dataset.gitT; render(); window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+  /* ---------- 2. KARNE ---------- */
+  bagla('KYil','onchange',function(e){SECK.yil=Number(e.target.value);render();});
+  bagla('KAy','onchange',function(e){SECK.ay=Number(e.target.value);render();});
+  bagla('KMarka','onchange',function(e){SECK.marka=e.target.value;SECK.danisman='';render();});
+  bagla('KDan','onchange',function(e){SECK.danisman=e.target.value;render();});
+
+  baglaHepsi('.k-hd','oninput',function(e){karneSatirYenile(e.dataset.k);});
+  baglaHepsi('.k-gr','oninput',function(e){karneSatirYenile(e.dataset.k);});
+  baglaHepsi('.k-gr','onchange',function(e){karneSatirYenile(e.dataset.k);});
+
+  bagla('kKaydet','onclick',function(){karneYaz(karneOku(false));toast('✓ Karne kaydedildi.');render();});
+  bagla('kOtoDurum','onclick',function(){
+    karneYaz(karneOku(true)); toast('✓ Durumlar hedef/gerçekleşme oranına göre hesaplandı.'); render();
+  });
+  bagla('kYazdir','onclick',function(){
+    var k=karneOku(false);
+    if(!k.ciktiTarihi)k.ciktiTarihi=new Date().toISOString();
+    karneYaz(k); yazdirAc(karneCiktiHtml(k)); render();
+  });
+  bagla('kIK','onclick',function(){
+    var k=karneOku(false); k.ikGonderildi=true; karneYaz(k);
+    toast('✓ İK\'ya gönderildi olarak işaretlendi.'); render();
+  });
+  bagla('kGB','onclick',function(){
+    var k=karneOku(false); karneYaz(k); yazdirAc(geriBildirimHtml(k));
+  });
+  bagla('kKesin','onclick',function(){
+    var k=karneOku(true), oz=karneOzet(k);
+    var eksik=(k.metrikler||[]).filter(function(r){return !r.durum;}).length;
+    var uyari='';
+    if(eksik)uyari+='<div class="note warn">'+eksik+' metrikte durum boş kaldı. Kesinleştirirseniz bu '+
+      'metrikler değerlendirme dışı sayılır.</div>';
+    if(oz.yetersiz>0&&!(k.gelisimPlani||'').trim()){
+      modalAc('Gelişim Planı Zorunlu',
+        '<div class="note bad">Bu karnede <b>'+oz.yetersiz+' metrik "Yetersiz"</b> olarak işaretlenmiş. '+
+        '4857 sayılı İş Kanunu kapsamında geçerli bir performans dosyası oluşabilmesi için '+
+        '<b>B. Yönetici Değerlendirmesi ve Gelişim Aksiyon Planı</b> alanı boş bırakılamaz.</div>'+
+        '<p>Lütfen kök nedenleri ve önümüzdeki dönem sağlanacak eğitim/gelişim aksiyonlarını yazıp '+
+        'tekrar deneyiniz.</p>',
+        [{ad:'Anladım',cls:'btn dark',fn:function(){modalKapat();var p=elId('kPlan');if(p)p.focus();}}],true);
+      return;
+    }
+    modalAc('Karneyi Kesinleştir',uyari+
+      '<div class="ov-who">'+esc(k.danisman)+' · '+esc(markaAd(k.marka))+' · '+esc(AYLAR[k.ay-1])+' '+k.yil+'</div>'+
+      '<p>Kesinleştirilen karne <b>değiştirilemez</b> hale gelir; düzeltme yalnızca İnsan Kaynakları '+
+      'tarafından yapılabilir.</p>'+
+      '<p>Değerlendirilen metrik: <b>'+oz.toplam+'</b> · Başarılı: <b>'+oz.basarili+'</b> · '+
+      'Yetersiz: <b style="color:var(--bad)">'+oz.yetersiz+'</b></p>'+
+      (oz.yetersiz>0?'<div class="note bad">Kesinleştirdikten sonra bu çalışan için '+
+        '<b>performans geri bildirim formu</b> düzenlenip imzalatılacaktır.</div>':''),
+      [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
+       {ad:'Kesinleştir',cls:'btn gold',fn:function(){
+         k.durum='kesinlesen'; k.kesinlesmeTarihi=new Date().toISOString();
+         karneYaz(k); modalKapat(); render();
+         if(oz.yetersiz>0)gbModal(k); else toast('✓ Karne kesinleştirildi.');
+       }}]);
+  });
+  baglaHepsi('[data-git-k]','onclick',function(e){
+    SECK.danisman=e.dataset.gitK; render(); window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+  /* ---------- 3. GERİ BİLDİRİM ---------- */
+  baglaHepsi('[data-gb]','onclick',function(e){
+    var k=KARNELER.find(function(x){return x.id===e.dataset.gb;});
+    if(k)yazdirAc(geriBildirimHtml(k));
+  });
+  baglaHepsi('[data-gbok]','onclick',function(e){
+    var k=KARNELER.find(function(x){return x.id===e.dataset.gbok;}); if(!k)return;
+    k.gbTarihi=new Date().toISOString(); karneYaz(k);
+    toast('✓ Geri bildirim formunun imzalandığı kaydedildi.'); render();
+  });
+
+  /* ---------- GENEL BAKIŞ ---------- */
+  bagla('gYil','onchange',function(e){FLT.yil=Number(e.target.value);render();});
+  bagla('gAy','onchange',function(e){FLT.ay=Number(e.target.value);render();});
+  bagla('gYedek','onclick',function(){
+    var veri={tarih:new Date().toISOString(),markalar:WORK.markalar,metrikler:WORK.metrikler,
+      kadro:WORK.kadro,tebligler:TEBLIGLER,karneler:KARNELER};
+    var b=new Blob([JSON.stringify(veri,null,1)],{type:'application/json'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='servis_panosu_yedek_'+new Date().toISOString().slice(0,10)+'.json';
+    a.click(); toast('✓ Yedek indirildi.');
+  });
+
+  /* ---------- METRİK YÖNETİMİ ---------- */
+  bagla('mMarka','onchange',function(e){MSEC.marka=e.target.value;MSEC.rol='';render();});
+  bagla('mRol','onchange',function(e){MSEC.rol=e.target.value;render();});
+  bagla('mKaydet','onclick',function(){
+    WORK.metrikler[setKey(MSEC.marka,MSEC.rol)]=metrikOku();
+    veriKaydet(); toast('✓ Metrik seti kaydedildi.'); render();
+  });
+  bagla('mEkle','onclick',function(){
+    var list=metrikOku();
+    list.push({key:'m_yeni_'+Math.random().toString(36).slice(2,7),ad:'Yeni Metrik',
+      grup:'A',tip:'sayi',yon:'yuksek',esik:1,vh:null,not:''});
+    WORK.metrikler[setKey(MSEC.marka,MSEC.rol)]=list; veriKaydet(true); render();
+  });
+  baglaHepsi('[data-msil]','onclick',function(e){
+    var i=Number(e.dataset.msil), list=metrikOku();
+    modalAc('Metriği Sil','<p><b>'+esc(list[i]?list[i].ad:'')+'</b> metriği bu karne tipinden kaldırılacak. '+
+      'Daha önce kaydedilmiş karneler etkilenmez.</p>',
+      [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
+       {ad:'Sil',cls:'btn danger',fn:function(){
+         list.splice(i,1); WORK.metrikler[setKey(MSEC.marka,MSEC.rol)]=list;
+         veriKaydet(); modalKapat(); render();
+       }}],true);
+  });
+  function metrikTasi(i,yon){
+    var list=metrikOku(), j=i+yon;
+    if(j<0||j>=list.length)return;
+    var t=list[i]; list[i]=list[j]; list[j]=t;
+    WORK.metrikler[setKey(MSEC.marka,MSEC.rol)]=list; veriKaydet(true); render();
+  }
+  baglaHepsi('[data-myuk]','onclick',function(e){metrikTasi(Number(e.dataset.myuk),-1);});
+  baglaHepsi('[data-masa]','onclick',function(e){metrikTasi(Number(e.dataset.masa),1);});
+
+  /* ---------- KADRO ---------- */
+  bagla('kadKaydet','onclick',function(){
+    WORK.kadro=kadroOku(); veriKaydet(); toast('✓ Kadro kaydedildi.'); render();
+  });
+  bagla('kadEkle','onclick',function(){
+    var list=kadroOku();
+    list.push({ad:'Yeni Çalışan',unvan:'Servis Danışmanı',
+      marka:(aktifMarkalar()[0]||{kod:'BMW'}).kod,rol:'mekanik',giris:'',aktif:true});
+    WORK.kadro=list; veriKaydet(true); render();
+  });
+  baglaHepsi('[data-ksil]','onclick',function(e){
+    var i=Number(e.dataset.ksil), list=kadroOku();
+    modalAc('Kaydı Sil','<p><b>'+esc(list[i]?list[i].ad:'')+'</b> kadrodan silinecek. '+
+      'Bu kişiye ait geçmiş tebliğ ve karneler sistemde kalır.</p>'+
+      '<div class="note">Çalışan işten ayrılmadıysa silmek yerine <b>"Karne alır"</b> işaretini '+
+      'kaldırmanız önerilir.</div>',
+      [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
+       {ad:'Sil',cls:'btn danger',fn:function(){
+         list.splice(i,1); WORK.kadro=list; veriKaydet(); modalKapat(); render();
+       }}],true);
+  });
+  baglaHepsi('[data-usif]','onclick',function(e){
+    var i=Number(e.dataset.usif), u=(WORK.users||[])[i]; if(!u)return;
+    modalAc('Şifre Belirle — '+u.ad,
+      '<p><b>'+esc(u.kullanici)+'</b> kullanıcısı için yeni bir şifre belirleyeceksiniz. '+
+      'Yeni şifreyi ilgili yöneticiye kendiniz iletmelisiniz.</p>'+
+      '<div class="fld"><label>Yeni Şifre (en az 6 karakter)</label><input id="uPw" type="text"></div>'+
+      '<div id="uErr" style="color:var(--bad);font-size:12.5px;min-height:17px"></div>',
+      [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
+       {ad:'Kaydet',cls:'btn dark',fn:function(){
+         var p=elId('uPw').value;
+         if(p.length<6){elId('uErr').textContent='Şifre en az 6 karakter olmalı.';return;}
+         u.hash=hashPw(u.kullanici,p); veriKaydet(); modalKapat();
+         toast('✓ '+u.kullanici+' kullanıcısının şifresi güncellendi.');
+       }}]);
+  });
+}
+
+/* Kesinleştirme sonrası zorunlu geri bildirim uyarısı. */
+function gbModal(k){
+  var oz=karneOzet(k);
+  modalAc('⚠ Zorunlu Bildirim',
+    '<div class="ov-who">'+esc(k.danisman)+' · '+esc(markaAd(k.marka))+' · '+
+      esc(AYLAR[k.ay-1])+' '+k.yil+'</div>'+
+    '<p>Bu çalışanın karnesinde <b>'+oz.yetersiz+' metrik "Yetersiz"</b> olarak kesinleşmiştir. '+
+    'Performans geri bildirim süreci başlatılmalıdır:</p>'+
+    '<p>1. Aşağıdaki formu yazdırınız.<br>'+
+    '2. Çalışana tebliğ edip <b>görüş beyanını</b> alınız.<br>'+
+    '3. İmzalı formu İnsan Kaynakları Direktörlüğü\'ne iletiniz.</p>',
+    [{ad:'Kapat',cls:'btn',fn:modalKapat},
+     {ad:'📄 Geri Bildirim Formunu Aç',cls:'btn gold',fn:function(){
+       yazdirAc(geriBildirimHtml(k)); modalKapat();
+     }}],true);
+}
+
+</script>
+
+<!-- ============================================================================
+     FIRESTORE KÖPRÜSÜ
+     Satış Panosu ile aynı Firebase projesi kullanılır; veriler tamamen ayrı
+     koleksiyonlarda tutulur:
+        servisVeri/current   → metrik setleri, kadro, markalar, kullanıcılar
+        servisTebligler/{id} → hedef tebliğ formları
+        servisKarneler/{id}  → aylık performans karneleri
+     İnternet yoksa uygulama yerel modda (localStorage) çalışmaya devam eder.
+     ========================================================================= -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWlB0nU-ETZxuo9xa6gG4VMYVu09P3fnE",
+    authDomain: "yetenek-havuzu.firebaseapp.com",
+    projectId: "yetenek-havuzu",
+    storageBucket: "yetenek-havuzu.firebasestorage.app",
+    messagingSenderId: "714642441227",
+    appId: "1:714642441227:web:bf49ac51367c6d9437b30e"
+  };
+
+  try {
+    const app = initializeApp(firebaseConfig, "servis-panosu");
+    const db  = getFirestore(app);
+    const veriRef   = doc(db, "servisVeri", "current");
+    const tebligCol = collection(db, "servisTebligler");
+    const karneCol  = collection(db, "servisKarneler");
+
+    /* undefined değerler Firestore tarafından reddedilir — temizleyerek yazıyoruz. */
+    const temiz = (o) => JSON.parse(JSON.stringify(o));
+
+    window.ServisFB = {
+      pushVeri(p){
+        return setDoc(veriRef, Object.assign(temiz(p), {updatedAt: serverTimestamp()}), {merge:true});
+      },
+      pushTeblig(t){
+        return setDoc(doc(tebligCol, t.id), Object.assign(temiz(t), {updatedAt: serverTimestamp()}), {merge:true});
+      },
+      pushKarne(k){
+        return setDoc(doc(karneCol, k.id), Object.assign(temiz(k), {updatedAt: serverTimestamp()}), {merge:true});
+      }
+    };
+
+    const hata = (e) => { if (window.servisBaglantiHatasi) window.servisBaglantiHatasi(e && e.message); };
+
+    onSnapshot(veriRef, (snap) => {
+      if (snap.exists() && window.servisVeriGeldi) window.servisVeriGeldi(snap.data());
+    }, hata);
+
+    onSnapshot(tebligCol, (snap) => {
+      const l = []; snap.forEach(d => l.push(d.data()));
+      if (window.servisTebliglerGeldi) window.servisTebliglerGeldi(l);
+    }, hata);
+
+    onSnapshot(karneCol, (snap) => {
+      const l = []; snap.forEach(d => l.push(d.data()));
+      if (window.servisKarnelerGeldi) window.servisKarnelerGeldi(l);
+    }, hata);
+
+  } catch (e) {
+    if (window.servisBaglantiHatasi) window.servisBaglantiHatasi(e && e.message);
+  }
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){});
+    });
+  }
+</script>
+</body>
+</html>
