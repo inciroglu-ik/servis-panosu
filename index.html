@@ -158,6 +158,10 @@ table.tbl td.num,table.tbl th.num{text-align:right;font-variant-numeric:tabular-
   text-align:right;font-variant-numeric:tabular-nums;background:#fffdf5}
 .mtr-in:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(201,162,39,.15);background:#fff}
 .mtr-in.ro{background:var(--surface-2);color:var(--ink-2)}
+/* Türetilmiş (otomatik hesaplanan) metrik hücresi — span olduğu için kutu
+   görünümü almak üzere inline-block. İnce kesikli çerçeve "otomatik"i vurgular. */
+span.mtr-in{display:inline-block;min-width:96px;box-sizing:border-box;border-style:dashed;
+  cursor:default;font-weight:500}
 .mtr-sel{padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:12.5px}
 .mtr-ad{font-weight:500}
 .mtr-not{display:block;font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;line-height:1.35}
@@ -321,7 +325,7 @@ var TANIM_MARKALAR=[
    roller:['mekanik']},
   {kod:'OMODA_JAECOO',   ad:'Omoda & Jaecoo',   mudur:'',                   aktif:true,
    roller:['mekanik']},
-  {kod:'HASAR',          ad:'Hasar (Kaporta-Boya)', mudur:'İbrahim Topçu',  aktif:false,
+  {kod:'HASAR',          ad:'Hasar (Kaporta-Boya)', mudur:'İbrahim Topçu',  aktif:true,
    roller:['hasar']}
 ];
 
@@ -342,6 +346,10 @@ var ROL_AD={mekanik:'Mekanik Servis Danışmanı',garanti:'Garanti Servis Danı�
              İK talimatı gereği varsayılan 1 (minimum %100) kabul edilmiştir.
      vh    : varsayılan hedef (tebliğ ekranında hazır gelir, müdür değiştirebilir)
      not   : metrik altında görünen açıklama
+     hesap : türetilmiş metrik → {pay:'<key>', bol:'<key>'}. Değer = pay ÷ bol,
+             hem hedef hem gerçekleşen tarafında ayrı ayrı hesaplanır. Bu metriğe
+             elle girilmez; kaynak metrikler girilince kendiliğinden dolar
+             (ör. Araç Başı İşçilik = İşçilik Ciro ÷ İş Emri Adedi).
 --------------------------------------------------------------------------- */
 function M(key,ad,grup,opt){
   opt=opt||{};
@@ -349,7 +357,8 @@ function M(key,ad,grup,opt){
     tip:opt.tip||'sayi', yon:opt.yon||'yuksek',
     esik:(opt.esik==null?1:opt.esik),
     vh:(opt.vh==null?null:opt.vh),
-    not:opt.not||''};
+    not:opt.not||'',
+    hesap:opt.hesap||null};
 }
 
 var TANIM_METRIKLER={
@@ -502,11 +511,21 @@ var TANIM_METRIKLER={
 ],
 
 /* ---------- HASAR DEPARTMANI (şimdilik pasif) ---------- */
+/* ---------- HASAR DEPARTMANI (İbrahim Topçu) ----------
+   Metrikler diğer markalardan çok daha sade. GoPoint Servis Rapor'daki "Kaporta
+   Boya" satırından gelen 3 ham veri (İş Emri, İşçilik Ciro, Yedek Parça Ciro)
+   girilince "Araç Başı" metrikleri otomatik hesaplanır. Ortalama Tahsilat Süresi
+   elle (gün) girilir; kısa olması iyi olduğu için 'dusuk' yönlüdür. */
 'HASAR::hasar':[
-  M('is_emri','İş Emri Adedi','A'),
-  M('ciro_iscilik','Danışman Başına Servis Cirosu (İşçilik)','A'),
-  M('ciro_parca','Danışman Başına Servis Cirosu (Yedek Parça)','A'),
-  M('sikayet','Şikâyet Sayısı','B',{tip:'varyok'})
+  M('is_emri','İş Emri Adedi (Ücretli)','A'),
+  M('iscilik_ciro','İşçilik Ciro','A'),
+  M('parca_ciro','Yedek Parça Ciro','A'),
+  M('arac_basi_iscilik','Araç Başı İşçilik Tutarı','A',
+    {hesap:{pay:'iscilik_ciro',bol:'is_emri'},not:'İşçilik Ciro ÷ İş Emri Adedi — otomatik hesaplanır.'}),
+  M('ort_tahsilat','Ortalama Tahsilat Süresi','A',
+    {yon:'dusuk',not:'Gün cinsinden; kısa olması hedeflenir. Müdür hedefi elle girer.'}),
+  M('arac_basi_parca','Araç Başı Parça Tutarı','A',
+    {hesap:{pay:'parca_ciro',bol:'is_emri'},not:'Yedek Parça Ciro ÷ İş Emri Adedi — otomatik hesaplanır.'})
 ]
 };
 
@@ -514,15 +533,16 @@ var TANIM_METRIKLER={
    KADRO  —  Çalışan Listesi (Ağustos 2026) esas alınmıştır.
    aktif:false olanlar sistemde kayıtlıdır ama karne üretilmez; İK panelinden
    tek tıkla açılabilir.
-     · HASAR departmanı (İbrahim Topçu ekibi) — hasar müdürüyle çalışma
-       tamamlanmadığı için kapalı.
+     · HASAR departmanı (İbrahim Topçu ekibi) — aktif; her danışman bir marka
+       grubuna bakar (etiket olarak görünür).
      · PSA Garanti Uzman Yardımcıları — PSA'da garanti karnesi tanımlanmadığı
        için kapalı.
    NOT: FIAT'ta Ahmet Kapusuz çalışan listesinde Ufuk Önsal'a bağlı görünüyordu;
    Ufuk Önsal satış müdürü olduğu için servis müdürü Fatih Boru'ya bağlandı.
 --------------------------------------------------------------------------- */
-function K(ad,unvan,marka,rol,giris,aktif){
-  return {ad:ad,unvan:unvan,marka:marka,rol:rol,giris:giris,aktif:aktif!==false};
+function K(ad,unvan,marka,rol,giris,aktif,etiket){
+  return {ad:ad,unvan:unvan,marka:marka,rol:rol,giris:giris,aktif:aktif!==false,
+    etiket:etiket||''};
 }
 
 var TANIM_KADRO=[
@@ -553,12 +573,15 @@ var TANIM_KADRO=[
   K('Emrecan Yücel','Garanti Uzman Yardımcısı','PSA','mekanik','05/05/2025',false),
   K('Mirkan Çolak','Garanti Uzman Yardımcısı','PSA','mekanik','16/06/2025',false),
 
-  /* HASAR — İbrahim Topçu (tamamı pasif) */
-  K('Çağrı Güneri','Hasar Servis Danışmanı','HASAR','hasar','10/01/2024',false),
-  K('Hamdi Yeşil','Hasar Servis Danışmanı','HASAR','hasar','08/07/2024',false),
-  K('Fatoş Polat','Hasar Servis Danışmanı','HASAR','hasar','16/09/2024',false),
-  K('Necla Nur Erciyes','Hasar Servis Danışmanı','HASAR','hasar','21/08/2024',false),
-  K('Sefa Göktaş','Hasar Servis Danışmanı','HASAR','hasar','23/09/2024',false)
+  /* HASAR — İbrahim Topçu. Her danışman bir marka grubuna bakar; marka etiketi
+     yalnızca ekranda isimlerinin yanında görünür (imzalı formlarda değil).
+     Hamdi Yeşil ve Fatoş Polat aynı markaya (Fiat/ARJ) baktığı için İK ikisine
+     aynı hedefi verip GoPoint bütçesini yarı yarıya böler. */
+  K('Çağrı Güneri','Hasar Servis Danışmanı','HASAR','hasar','10/01/2024',true,'Citroen, Opel'),
+  K('Hamdi Yeşil','Hasar Servis Danışmanı','HASAR','hasar','08/07/2024',true,'Fiat, ARJ'),
+  K('Fatoş Polat','Hasar Servis Danışmanı','HASAR','hasar','16/09/2024',true,'Fiat, ARJ'),
+  K('Necla Nur Erciyes','Hasar Servis Danışmanı','HASAR','hasar','21/08/2024',true,'Honda, Jaecoo, Omoda'),
+  K('Sefa Göktaş','Hasar Servis Danışmanı','HASAR','hasar','23/09/2024',true,'Peugeot, DS')
 ];
 
 /* ---------------------------------------------------------------------------
@@ -619,10 +642,25 @@ function isoTarihTR(iso){
   var d=new Date(iso); if(isNaN(d))return '—';
   return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
 }
+/* Metinden sayı çıkarır. Hem Türkçe format (1.745.354,40) hem de sistemin kendi
+   yeniden yazdığı JS ondalığı (1745354.4) doğru okunmalı:
+     · Virgül varsa → nokta binlik, virgül ondalık (1.745.354,40 → 1745354.40)
+     · Virgül yoksa ve noktalar 3'erli gruplarsa → binlik ayıracı (621.000 → 621000)
+     · Aksi halde tek nokta ondalıktır (1745354.4 / 5674.89 olduğu gibi kalır)
+   Böylece kuruşlu bir ciro kaydedilip tekrar açıldığında değeri bozulmaz. */
 function toNum(v){
   if(v==null)return null;
-  var s=String(v).trim(); if(s==='')return null;
-  s=s.replace(/\s/g,'').replace(/\./g,'').replace(',','.');   /* 1.234,56 → 1234.56 */
+  var s=String(v).trim().replace(/\s/g,''); if(s==='')return null;
+  if(s.indexOf(',')>=0){
+    s=s.replace(/\./g,'').replace(',','.');
+  }else{
+    var p=s.split('.');
+    if(p.length>1){
+      var binlik=p.slice(1).every(function(g){return g.length===3;});
+      if(binlik)s=p.join('');            /* 621.000 → 621000 */
+      /* değilse tek nokta ondalık kabul, dokunma (1745354.4) */
+    }
+  }
   var n=Number(s);
   return isFinite(n)?n:null;
 }
@@ -752,11 +790,30 @@ function kadroListe(marka,rol,hepsi){
 function kadroBul(ad,marka){
   return (WORK.kadro||[]).find(function(k){return k.ad===ad&&(!marka||k.marka===marka);})||null;
 }
+/* Ekranda görünen ad: hasar danışmanlarında sorumlu marka etikette gösterilir
+   (ör. "Sefa Göktaş (Peugeot, DS)"). İmzalatılan resmi formlarda kullanılmaz;
+   orada temiz ad görünür. Parametre bir kadro nesnesi ya da düz ad olabilir. */
+function danGorunen(kisiVeyaAd,marka){
+  var k=(kisiVeyaAd&&typeof kisiVeyaAd==='object')?kisiVeyaAd:kadroBul(kisiVeyaAd,marka);
+  if(!k)return String(kisiVeyaAd||'');
+  return k.ad+(k.etiket?' ('+k.etiket+')':'');
+}
 /* Oturumdaki kullanıcının erişebildiği markalar. */
 function yetkiliMarkalar(){
   if(!SES)return [];
   if(SES.rol==='admin')return aktifMarkalar().map(function(m){return m.kod;});
   return SES.marka?[SES.marka]:[];
+}
+
+/* ---------- TÜRETİLMİŞ (OTOMATİK HESAPLANAN) METRİKLER ----------
+   hesap:{pay,bol} olan metriğin değeri = pay ÷ bol. degerFn(key) ilgili kaynak
+   metriğin o andaki sayısal değerini (hedef ya da gerçekleşen) döndürür.
+   pay/bol boş veya bol=0 ise sonuç null (ekranda "—"). */
+function turetHesapla(m,degerFn){
+  if(!m||!m.hesap)return null;
+  var pay=degerFn(m.hesap.pay), bol=degerFn(m.hesap.bol);
+  if(pay==null||bol==null||bol===0)return null;
+  return Math.round((pay/bol)*100)/100;
 }
 
 /* ---------- HESAPLAMA ---------- */
@@ -1039,7 +1096,7 @@ function secimCubugu(pfx,S){
     '<option value="">— Danışman seçiniz —</option>'+
     kadro.map(function(k){
       return '<option value="'+esc(k.ad)+'"'+(S.danisman===k.ad?' selected':'')+'>'+
-        esc(k.ad)+'  ·  '+esc(rolAd(k.rol).replace(' Servis Danışmanı',''))+'</option>';
+        esc(danGorunen(k))+'  ·  '+esc(rolAd(k.rol).replace(' Servis Danışmanı',''))+'</option>';
     }).join('')+'</select></div>';
 
   return '<div class="card"><div class="card-b"><div class="row">'+
@@ -1100,20 +1157,30 @@ function viewTeblig(){
   /* Metrik satırları */
   var grupA=ms.filter(function(m){return m.grup==='A';});
   var grupB=ms.filter(function(m){return m.grup!=='A';});
+  /* Tebliğ hedeflerini kaynak alan değer fonksiyonu (türetilmiş hesap için). */
+  function tHedefDeger(key){return toNum(hedefMap[key]);}
   function satirlar(list){
     return list.map(function(m){
       var hv=hedefMap[m.key];
       var esikTxt=(m.tip==='varyok')?'YOK olmalı':('min. %'+Math.round((m.esik==null?1:m.esik)*100));
-      var giris=(m.tip==='varyok')
-        ? '<select class="mtr-sel t-h" data-k="'+m.key+'"'+(kilitli?' disabled':'')+'>'+
+      var giris;
+      if(m.hesap){
+        /* Türetilmiş metrik — elle girilmez, kaynak hedeflerden hesaplanır. */
+        var hesapVal=turetHesapla(m,tHedefDeger);
+        giris='<span class="mtr-in ro t-hesap" data-k="'+m.key+'" data-pay="'+m.hesap.pay+
+          '" data-bol="'+m.hesap.bol+'">'+(hesapVal==null?'—':fmtSayi(hesapVal))+'</span>';
+      }else if(m.tip==='varyok'){
+        giris='<select class="mtr-sel t-h" data-k="'+m.key+'"'+(kilitli?' disabled':'')+'>'+
           ['','VAR / YOK'].map(function(o){return '<option value="'+o+'"'+((hv||'')===o?' selected':'')+'>'+(o||'—')+'</option>';}).join('')+
-          '</select>'
-        : '<input class="mtr-in t-h" data-k="'+m.key+'" inputmode="decimal" value="'+
+          '</select>';
+      }else{
+        giris='<input class="mtr-in t-h" data-k="'+m.key+'" inputmode="decimal" value="'+
           (hv==null?'':esc(hv))+'" placeholder="—"'+(kilitli?' readonly':'')+'>';
+      }
       return '<tr><td><span class="mtr-ad">'+esc(m.ad)+'</span>'+
         (m.not?'<span class="mtr-not">'+esc(m.not)+'</span>':'')+'</td>'+
         '<td class="num">'+giris+'</td>'+
-        '<td><span class="mtr-hedef-info">'+esikTxt+(m.yon==='dusuk'?' · düşük iyi':'')+'</span></td></tr>';
+        '<td><span class="mtr-hedef-info">'+(m.hesap?'otomatik':esikTxt)+(m.yon==='dusuk'?' · düşük iyi':'')+'</span></td></tr>';
     }).join('');
   }
   var tbody='';
@@ -1122,7 +1189,7 @@ function viewTeblig(){
 
   h+='<div class="card">'+
     '<div class="card-h"><h3>Hedef Tebliğ Formu</h3>'+
-      '<span class="sub">'+esc(S.danisman)+' · '+esc(kisi.unvan)+' · '+esc(markaAd(S.marka))+' · '+
+      '<span class="sub">'+esc(danGorunen(kisi))+' · '+esc(kisi.unvan)+' · '+esc(markaAd(S.marka))+' · '+
       esc(AYLAR[S.ay-1])+' '+S.yil+'</span>'+
       '<div style="flex:1"></div>'+rz+
     '</div>'+
@@ -1161,7 +1228,7 @@ function tebligDonemListesi(){
       else {durum='Taslak';cls='b-warn';}
       var dolu=t?(t.metrikler||[]).filter(function(r){return r.hedef!=null&&r.hedef!=='';}).length:0;
       var top=metrikSeti(mk,k.rol).length;
-      satir+='<tr><td><b>'+esc(k.ad)+'</b></td><td>'+esc(k.unvan)+'</td>'+
+      satir+='<tr><td><b>'+esc(danGorunen(k))+'</b></td><td>'+esc(k.unvan)+'</td>'+
         '<td>'+esc(rolAd(k.rol))+'</td>'+
         '<td class="num">'+dolu+' / '+top+'</td>'+
         '<td><span class="badge '+cls+'">'+durum+'</span></td>'+
@@ -1176,16 +1243,28 @@ function tebligDonemListesi(){
     '<tbody>'+satir+'</tbody></table></div></div></div>';
 }
 
-/* Formdaki hedefleri okuyup kaydeder. */
+/* Formdaki hedefleri okuyup kaydeder. Türetilmiş metriklerin hedefi kaynak
+   hedeflerden hesaplanıp saklanır (kayıt kendi kendine yeter, karneye akar). */
 function tebligKaydet(sessiz){
   var S=SEC;
   var t=tebligBul(S.yil,S.ay,S.marka,S.rol,S.danisman)||tebligYeni(S.yil,S.ay,S.marka,S.rol,S.danisman);
-  var ms=metrikSeti(S.marka,S.rol), yeni=[];
+  var ms=metrikSeti(S.marka,S.rol), yeni=[], hamDeger={};
+  /* Önce ham (elle girilen) metrikleri oku. */
   ms.forEach(function(m){
+    if(m.hesap)return;
     var inp=document.querySelector('.t-h[data-k="'+m.key+'"]');
     var v=inp?inp.value:'';
-    if(m.tip==='varyok')yeni.push({key:m.key,hedef:v||null});
-    else yeni.push({key:m.key,hedef:(v===''?null:toNum(v))});
+    if(m.tip==='varyok'){yeni.push({key:m.key,hedef:v||null});}
+    else{var n=(v===''?null:toNum(v)); hamDeger[m.key]=n; yeni.push({key:m.key,hedef:n});}
+  });
+  /* Sonra türetilmiş metrikleri kaynak hedeflerden hesapla. */
+  ms.forEach(function(m){
+    if(!m.hesap)return;
+    yeni.push({key:m.key,hedef:turetHesapla(m,function(k){return hamDeger[k];})});
+  });
+  /* Metrik sırasını koru. */
+  yeni.sort(function(a,b){
+    return ms.findIndex(function(x){return x.key===a.key;})-ms.findIndex(function(x){return x.key===b.key;});
   });
   t.metrikler=yeni;
   t.unvan=(kadroBul(S.danisman,S.marka)||{}).unvan||t.unvan;
@@ -1277,21 +1356,36 @@ function viewKarne(){
   if(k.ikGonderildi)rz+='<span class="badge b-info">İK\'ya Gönderildi</span> ';
   if(ozet.yetersiz>0)rz+='<span class="badge b-bad">'+ozet.yetersiz+' metrikte yetersiz</span> ';
 
+  /* Karnedeki kaynak metriklerin o andaki hedef/gerçekleşen değerleri
+     (türetilmiş metriği hesaplamak için). */
+  function kHedefDeger(key){var rr=rMap[key];return rr?toNum(rr.hedef):null;}
+  function kGercDeger(key){var rr=rMap[key];return rr?toNum(rr.gerceklesen):null;}
   function satirlar(list){
     return list.map(function(m){
       var r=rMap[m.key]||{key:m.key,hedef:null,gerceklesen:null,subeOrt:null,durum:''};
       var so=subeOrtalama(S.yil,S.ay,S.marka,S.rol,m.key,S.danisman);
-      var hedefGiris=(m.tip==='varyok')
-        ? '<span class="mtr-hedef-info">YOK olmalı</span>'
-        : '<input class="mtr-in k-hd" data-k="'+m.key+'" inputmode="decimal" value="'+
-          (r.hedef==null?'':esc(r.hedef))+'" placeholder="—"'+(kilitli?' readonly':'')+'>';
-      var gercGiris=(m.tip==='varyok')
-        ? '<select class="mtr-sel k-gr" data-k="'+m.key+'"'+(kilitli?' disabled':'')+'>'+
+      var hedefGiris,gercGiris;
+      if(m.hesap){
+        /* Türetilmiş metrik: hem hedef hem gerçekleşen kaynaklardan hesaplanır,
+           elle girilmez. Oran/durum bu hesaplı değerler üzerinden çıkar. */
+        var hHes=turetHesapla(m,kHedefDeger), gHes=turetHesapla(m,kGercDeger);
+        r={key:m.key,hedef:hHes,gerceklesen:gHes,subeOrt:r.subeOrt,durum:r.durum};
+        hedefGiris='<span class="mtr-in ro k-hd-hesap" data-k="'+m.key+'" data-pay="'+m.hesap.pay+
+          '" data-bol="'+m.hesap.bol+'">'+(hHes==null?'—':fmtSayi(hHes))+'</span>';
+        gercGiris='<span class="mtr-in ro k-gr-hesap" data-k="'+m.key+'" data-pay="'+m.hesap.pay+
+          '" data-bol="'+m.hesap.bol+'">'+(gHes==null?'—':fmtSayi(gHes))+'</span>';
+      }else if(m.tip==='varyok'){
+        hedefGiris='<span class="mtr-hedef-info">YOK olmalı</span>';
+        gercGiris='<select class="mtr-sel k-gr" data-k="'+m.key+'"'+(kilitli?' disabled':'')+'>'+
           ['','YOK','VAR'].map(function(o){
             return '<option value="'+o+'"'+((r.gerceklesen||'')===o?' selected':'')+'>'+(o||'—')+'</option>';}).join('')+
-          '</select>'
-        : '<input class="mtr-in k-gr" data-k="'+m.key+'" inputmode="decimal" value="'+
+          '</select>';
+      }else{
+        hedefGiris='<input class="mtr-in k-hd" data-k="'+m.key+'" inputmode="decimal" value="'+
+          (r.hedef==null?'':esc(r.hedef))+'" placeholder="—"'+(kilitli?' readonly':'')+'>';
+        gercGiris='<input class="mtr-in k-gr" data-k="'+m.key+'" inputmode="decimal" value="'+
           (r.gerceklesen==null?'':esc(r.gerceklesen))+'" placeholder="—"'+(kilitli?' readonly':'')+'>';
+      }
       var durumSel='<select class="mtr-sel k-dr" data-k="'+m.key+'"'+(kilitli?' disabled':'')+'>'+
         ['','Başarılı','Yetersiz','Etkisi Yok'].map(function(o){
           return '<option value="'+o+'"'+((r.durum||'')===o?' selected':'')+'>'+(o||'Seçiniz')+'</option>';}).join('')+
@@ -1299,8 +1393,8 @@ function viewKarne(){
       return '<tr data-row="'+m.key+'">'+
         '<td><span class="mtr-ad">'+esc(m.ad)+'</span>'+
           (m.not?'<span class="mtr-not">'+esc(m.not)+'</span>':'')+
-          '<span class="mtr-not">Eşik: min. %'+Math.round((m.esik==null?1:m.esik)*100)+
-          (m.yon==='dusuk'?' · düşük olması iyi':'')+'</span></td>'+
+          '<span class="mtr-not">'+(m.hesap?'Otomatik hesaplanır':'Eşik: min. %'+Math.round((m.esik==null?1:m.esik)*100)+
+          (m.yon==='dusuk'?' · düşük olması iyi':''))+'</span></td>'+
         '<td class="num">'+hedefGiris+'</td>'+
         '<td class="num">'+gercGiris+'</td>'+
         '<td class="num" data-cell="oran">'+oranRozet(m,r)+'</td>'+
@@ -1328,7 +1422,7 @@ function viewKarne(){
     '</div>'+
     '<div class="card">'+
     '<div class="card-h"><h3>Aylık Performans Karnesi</h3>'+
-      '<span class="sub">'+esc(S.danisman)+' · '+esc(kisi.unvan)+' · '+esc(rolAd(S.rol))+'</span>'+
+      '<span class="sub">'+esc(danGorunen(kisi))+' · '+esc(kisi.unvan)+' · '+esc(rolAd(S.rol))+'</span>'+
       '<div style="flex:1"></div>'+rz+'</div>'+
     '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
       '<thead><tr><th style="min-width:270px">Performans Metriği</th>'+
@@ -1374,7 +1468,7 @@ function karneDonemListesi(){
       if(k.durum==='kesinlesen'){durum=k.ikGonderildi?'İK\'da':'Kesinleşti';cls='b-ok';}
       else {durum='Taslak';cls='b-warn';}
     }
-    satir+='<tr><td><b>'+esc(kk.ad)+'</b></td>'+
+    satir+='<tr><td><b>'+esc(danGorunen(kk))+'</b></td>'+
       '<td>'+esc(rolAd(kk.rol))+'</td>'+
       '<td class="num">'+(oz.toplam||'—')+'</td>'+
       '<td class="num">'+(oz.oran==null?'—':'<span class="badge '+(oz.yetersiz?'b-warn':'b-ok')+'">'+fmtYuzde(oz.oran)+'</span>')+'</td>'+
@@ -1396,15 +1490,25 @@ function karneDonemListesi(){
 function karneOku(otoDurum){
   var S=SECK;
   var k=karneBul(S.yil,S.ay,S.marka,S.rol,S.danisman)||karneYeni(S.yil,S.ay,S.marka,S.rol,S.danisman);
-  var ms=metrikSeti(S.marka,S.rol), yeni=[];
+  var ms=metrikSeti(S.marka,S.rol), yeni=[], hamH={}, hamG={};
   ms.forEach(function(m){
-    var hd=document.querySelector('.k-hd[data-k="'+m.key+'"]');
-    var gr=document.querySelector('.k-gr[data-k="'+m.key+'"]');
     var dr=document.querySelector('.k-dr[data-k="'+m.key+'"]');
-    var r={key:m.key,
-      hedef:(m.tip==='varyok')?'VAR / YOK':(hd&&hd.value!==''?toNum(hd.value):null),
-      gerceklesen:(m.tip==='varyok')?(gr?gr.value||null:null):(gr&&gr.value!==''?toNum(gr.value):null),
-      subeOrt:null, durum:(dr?dr.value:'')};
+    var r;
+    if(m.hesap){
+      /* Türetilmiş metrik: hedef ve gerçekleşen kaynaklardan hesaplanır. */
+      r={key:m.key,
+        hedef:turetHesapla(m,function(x){return hamH[x];}),
+        gerceklesen:turetHesapla(m,function(x){return hamG[x];}),
+        subeOrt:null, durum:(dr?dr.value:'')};
+    }else{
+      var hd=document.querySelector('.k-hd[data-k="'+m.key+'"]');
+      var gr=document.querySelector('.k-gr[data-k="'+m.key+'"]');
+      r={key:m.key,
+        hedef:(m.tip==='varyok')?'VAR / YOK':(hd&&hd.value!==''?toNum(hd.value):null),
+        gerceklesen:(m.tip==='varyok')?(gr?gr.value||null:null):(gr&&gr.value!==''?toNum(gr.value):null),
+        subeOrt:null, durum:(dr?dr.value:'')};
+      if(m.tip!=='varyok'){hamH[m.key]=toNum(r.hedef); hamG[m.key]=toNum(r.gerceklesen);}
+    }
     r.subeOrt=subeOrtalama(S.yil,S.ay,S.marka,S.rol,m.key,S.danisman);
     if(r.subeOrt!=null)r.subeOrt=Math.round(r.subeOrt*100)/100;
     if(otoDurum||!r.durum){
@@ -1680,7 +1784,7 @@ function viewGeriBildirim(){
       ? '<span class="badge b-ok">✓ Form Alındı · '+isoTarihTR(k.gbTarihi)+'</span>'
       : (k.durum==='kesinlesen'?'<span class="badge b-bad">Form Bekliyor</span>'
                                :'<span class="badge b-warn">Karne Taslak</span>');
-    return '<tr><td><b>'+esc(k.danisman)+'</b><span class="mtr-not">'+esc(k.unvan||'')+'</span></td>'+
+    return '<tr><td><b>'+esc(danGorunen(k.danisman,k.marka))+'</b><span class="mtr-not">'+esc(k.unvan||'')+'</span></td>'+
       '<td>'+esc(markaAd(k.marka))+'</td>'+
       '<td>'+esc(AYLAR[k.ay-1])+' '+k.yil+'</td>'+
       '<td class="num"><span class="badge b-bad">'+oz.yetersiz+'</span></td>'+
@@ -1782,7 +1886,8 @@ function viewMetrik(){
 
   var satir=ms.map(function(m,i){
     return '<tr data-mi="'+i+'">'+
-      '<td><input class="m-ad" value="'+esc(m.ad)+'" style="width:100%;min-width:230px;padding:6px 9px;border:1px solid var(--line);border-radius:6px"></td>'+
+      '<td><input class="m-ad" value="'+esc(m.ad)+'" style="width:100%;min-width:230px;padding:6px 9px;border:1px solid var(--line);border-radius:6px">'+
+        (m.hesap?'<span class="mtr-not">⚙ Otomatik hesaplanır ('+esc(m.hesap.pay)+' ÷ '+esc(m.hesap.bol)+') — eşiği düzenlenebilir</span>':'')+'</td>'+
       '<td><select class="m-grup mtr-sel">'+
         [['A','A) Verimlilik ve Ciro'],['B','B) Müşteri Deneyimi']].map(function(o){
           return '<option value="'+o[0]+'"'+((m.grup||'A')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+
@@ -1845,7 +1950,8 @@ function metrikOku(){
       yon:tr.querySelector('.m-yon').value,
       esik:(esik==null?1:esik/100),
       vh:(vh===''?null:toNum(vh)),
-      not:tr.querySelector('.m-not').value.trim()
+      not:tr.querySelector('.m-not').value.trim(),
+      hesap:(eski.hesap||null)   /* türetilmiş metrik ilişkisi editörde korunur */
     });
   });
   return yeni;
@@ -1923,20 +2029,71 @@ function baglaHepsi(sec,olay,fn){
   Array.prototype.forEach.call(document.querySelectorAll(sec),function(e){e[olay]=function(ev){fn(e,ev);};});
 }
 
-/* Karnede bir satırın başarı oranını ve önerilen durumunu canlı günceller. */
-function karneSatirYenile(key){
-  var m=metrikSeti(SECK.marka,SECK.rol).find(function(x){return x.key===key;});
-  if(!m)return;
+/* Tebliğ formunda ham hedef değişince türetilmiş (t-hesap) hücreleri yeniler. */
+function tebligHesapYenile(){
+  var ms=metrikSeti(SEC.marka,SEC.rol);
+  function deger(key){
+    var inp=document.querySelector('.t-h[data-k="'+key+'"]');
+    return inp?toNum(inp.value):null;
+  }
+  ms.forEach(function(m){
+    if(!m.hesap)return;
+    var el=document.querySelector('.t-hesap[data-k="'+m.key+'"]');
+    if(!el)return;
+    var v=turetHesapla(m,deger);
+    el.textContent=(v==null?'—':fmtSayi(v));
+  });
+}
+
+/* Karnede kaynak metriklerin o andaki hedef/gerçekleşen değerlerini DOM'dan okur
+   (ham inputlar ya da türetilmiş hesaplı hücreler). */
+function karneKaynakHedef(key){
   var hd=document.querySelector('.k-hd[data-k="'+key+'"]');
+  if(hd)return toNum(hd.value);
+  var hs=document.querySelector('.k-hd-hesap[data-k="'+key+'"]');
+  if(hs)return toNum(hs.textContent);
+  return null;
+}
+function karneKaynakGerc(key){
   var gr=document.querySelector('.k-gr[data-k="'+key+'"]');
-  var dr=document.querySelector('.k-dr[data-k="'+key+'"]');
-  var r={key:key,
-    hedef:(m.tip==='varyok')?null:(hd?toNum(hd.value):null),
-    gerceklesen:(m.tip==='varyok')?(gr?gr.value:null):(gr?toNum(gr.value):null)};
-  var tr=document.querySelector('tr[data-row="'+key+'"]');
-  if(tr){var c=tr.querySelector('[data-cell="oran"]'); if(c)c.innerHTML=oranRozet(m,r);}
+  if(gr)return toNum(gr.value);
+  var gs=document.querySelector('.k-gr-hesap[data-k="'+key+'"]');
+  if(gs)return toNum(gs.textContent);
+  return null;
+}
+/* Bir satırın oranını ve önerilen durumunu, verilen hedef/gerçekleşenden günceller. */
+function karneSatirCiz(m,hedef,gerc){
+  var tr=document.querySelector('tr[data-row="'+m.key+'"]'); if(!tr)return;
+  var c=tr.querySelector('[data-cell="oran"]');
+  var r={key:m.key,hedef:hedef,gerceklesen:gerc};
+  if(c)c.innerHTML=oranRozet(m,r);
+  var dr=tr.querySelector('.k-dr[data-k="'+m.key+'"]');
   var oneri=durumOner(m,r);
   if(dr&&oneri&&dr.value!=='Etkisi Yok')dr.value=oneri;
+}
+/* Karnede bir input değiştiğinde: o satırı ve ona bağlı türetilmiş satırları yenile. */
+function karneSatirYenile(key){
+  var ms=metrikSeti(SECK.marka,SECK.rol);
+  var m=ms.find(function(x){return x.key===key;}); if(!m)return;
+  /* Değişen (ham) satırın kendisi. */
+  if(!m.hesap){
+    var hedef=(m.tip==='varyok')?null:karneKaynakHedef(key);
+    var gerc=(m.tip==='varyok')
+      ?(document.querySelector('.k-gr[data-k="'+key+'"]')||{}).value
+      :karneKaynakGerc(key);
+    karneSatirCiz(m,hedef,gerc);
+  }
+  /* Bu metriği kaynak alan türetilmiş satırları yeniden hesapla. */
+  ms.forEach(function(dm){
+    if(!dm.hesap)return;
+    if(dm.hesap.pay!==key&&dm.hesap.bol!==key)return;
+    var hHes=turetHesapla(dm,karneKaynakHedef), gHes=turetHesapla(dm,karneKaynakGerc);
+    var hEl=document.querySelector('.k-hd-hesap[data-k="'+dm.key+'"]');
+    var gEl=document.querySelector('.k-gr-hesap[data-k="'+dm.key+'"]');
+    if(hEl)hEl.textContent=(hHes==null?'—':fmtSayi(hHes));
+    if(gEl)gEl.textContent=(gHes==null?'—':fmtSayi(gHes));
+    karneSatirCiz(dm,hHes,gHes);
+  });
 }
 
 function baglaOlaylar(){
@@ -1979,6 +2136,8 @@ function baglaOlaylar(){
   baglaHepsi('[data-git-t]','onclick',function(e){
     SEC.danisman=e.dataset.gitT; render(); window.scrollTo({top:0,behavior:'smooth'});
   });
+  /* Ham hedef girilince türetilmiş (t-hesap) hücreleri canlı güncelle. */
+  baglaHepsi('.t-h','oninput',function(){tebligHesapYenile();});
 
   /* ---------- 2. KARNE ---------- */
   bagla('KYil','onchange',function(e){SECK.yil=Number(e.target.value);render();});
