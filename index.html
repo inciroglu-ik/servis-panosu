@@ -278,6 +278,7 @@ span.mtr-in{display:inline-block;min-width:96px;box-sizing:border-box;border-sty
         <b id="whoAd">—</b>
         <span id="whoRol">—</span>
       </div>
+      <button class="tb-btn" id="dashBtn" title="Marka bazlı performans analitiği (ayrı pencere)">📊 Dashboard</button>
       <button class="tb-btn" id="pwBtn" title="Şifre değiştir">🔑</button>
       <button class="tb-btn" id="logoutBtn">Çıkış</button>
     </div>
@@ -982,6 +983,7 @@ elId('logoutBtn').addEventListener('click',function(){
   elId('p').value='';
 });
 elId('pwBtn').addEventListener('click',function(){sifreModal();});
+elId('dashBtn').addEventListener('click',function(){dashboardAc();});
 
 function uygulamaBaslat(){
   elId('login').classList.add('hidden');
@@ -1049,6 +1051,145 @@ function modalAc(baslik,govde,butonlar,tehlike){
   });
 }
 function modalKapat(){elId('ovRoot').innerHTML='';}
+
+/* ============================================================================
+   PERFORMANS DASHBOARD  (ayrı pencere · marka bazlı · Chart.js)
+   ========================================================================== */
+function dashPayload(){
+  var yetki=yetkiliMarkalar();
+  var brands=yetki.map(function(kod){
+    var m=markaBul(kod);
+    var roller=markaRolleri(kod).map(function(r){
+      return {rol:r, ad:rolAd(r), metrikler:metrikSeti(kod,r).map(function(x){return {key:x.key, ad:x.ad};})};
+    });
+    return {kod:kod, ad:(m?m.ad:kod), mudur:(m&&m.mudur)||'', roller:roller};
+  });
+  var kl=KARNELER.filter(function(k){return yetki.indexOf(k.marka)>=0;}).map(function(k){
+    var oz=karneOzet(k), md={};
+    (k.metrikler||[]).forEach(function(r){ if(r.key)md[r.key]=r.durum||''; });
+    return {yil:Number(k.yil), ay:Number(k.ay), marka:k.marka, rol:k.rol,
+      danisman:danGorunen(k.danisman,k.marka), unvan:k.unvan||'', durum:k.durum||'taslak',
+      toplam:oz.toplam, basarili:oz.basarili, yetersiz:oz.yetersiz, oran:oz.oran, md:md};
+  });
+  var logo='';
+  try{logo=(getComputedStyle(document.documentElement).getPropertyValue('--logo')||'')
+    .replace(/^\s*url\((['"]?)([\s\S]*?)\1\)\s*$/,'$2').trim();}catch(e){}
+  return {brands:brands, karneler:kl, aylar:AYLAR, logo:logo};
+}
+
+function dashboardAc(){
+  var P=dashPayload();
+  if(!P.brands.length){toast('Görüntülenecek marka bulunamadı.');return;}
+  var w=window.open('','_blank');
+  if(!w){toast('⚠ Açılır pencere engellendi. Adres çubuğundaki engeli kaldırın.',5000);return;}
+  var html='<!doctype html><html lang="tr"><head><meta charset="utf-8">'+
+'<meta name="viewport" content="width=device-width,initial-scale=1">'+
+'<title>Performans Analitiği · İnciroğlu Otomotiv</title>'+
+'<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'+
+'<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">'+
+'<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>'+
+'<style>'+
+'*{box-sizing:border-box;margin:0;padding:0}'+
+'body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#eef1f4;color:#0e1b28}'+
+'.wrap{max-width:1280px;margin:0 auto;padding:0 20px 30px}'+
+'.hd{background:linear-gradient(120deg,#16324e,#1f456b);color:#fff}'+
+'.hd-in{max-width:1280px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}'+
+'.hd img.logo{height:32px;filter:brightness(0) invert(1);opacity:.95}'+
+'.hd h1{font-family:"Source Serif 4",Georgia,serif;font-size:20px;font-weight:600}'+
+'.hd .sub{font-size:12px;color:#c3d1df;margin-top:1px}'+
+'.hd .sp{flex:1}'+
+'.hd .yr,.hd .prn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:8px;padding:7px 11px;font-size:13px;cursor:pointer}'+
+'.hd .yr option{color:#0e1b28}'+
+'.btabs{background:#16324e}.btabs-in{max-width:1280px;margin:0 auto;padding:0 12px;display:flex;gap:2px;overflow-x:auto}'+
+'.btab{background:transparent;color:#a9bdd2;border:none;border-bottom:3px solid transparent;padding:11px 16px;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap}'+
+'.btab.on{color:#fff;border-bottom-color:#c9a227}'+
+'.acc{height:3px;background:linear-gradient(90deg,#c9a227,#e0be4f)}'+
+'.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:22px 0}'+
+'.kpi{background:#fff;border:1px solid #e6e8ec;border-radius:12px;padding:15px 18px;box-shadow:0 1px 3px rgba(16,27,40,.06)}'+
+'.kpi .l{font-size:11px;color:#8a8f96;text-transform:uppercase;letter-spacing:.5px;font-weight:600}'+
+'.kpi .v{font-size:29px;font-weight:700;margin-top:5px;font-family:"Source Serif 4",Georgia,serif}'+
+'.kpi .s{font-size:12px;color:#8a8f96;margin-top:2px}'+
+'.kpi.b .v{color:#16324e}.kpi.g .v{color:#c9a227}.kpi.ok .v{color:#0ca30c}.kpi.bad .v{color:#d03b3b}'+
+'.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}'+
+'.card{background:#fff;border:1px solid #e6e8ec;border-radius:12px;box-shadow:0 1px 3px rgba(16,27,40,.06)}'+
+'.card-h{padding:14px 18px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}'+
+'.card-h h3{font-size:15px;font-weight:600}'+
+'.card-h .sub{font-size:11.5px;color:#8a8f96}'+
+'.card-b{padding:12px 18px 18px}'+
+'.cw{position:relative;height:300px}.cw.tall{height:340px}'+
+'.rtabs{display:flex;gap:6px;flex-wrap:wrap}'+
+'.rtab{background:#f7f8fa;border:1px solid #cfd4da;border-radius:20px;padding:4px 12px;font-size:12px;cursor:pointer;color:#52514e}'+
+'.rtab.on{background:#16324e;color:#fff;border-color:#16324e}'+
+'.empty{padding:60px 20px;text-align:center;color:#8a8f96;font-size:14px}'+
+'.foot{text-align:center;color:#9aa0a7;font-size:11.5px;margin-top:26px;padding-top:16px;border-top:1px solid #e6e8ec}'+
+'@media(max-width:820px){.grid{grid-template-columns:1fr}}'+
+'@media print{.no-print{display:none}body{background:#fff}.hd,.btabs,.acc,.kpi,.card{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'+
+'</style></head><body><div id="root"></div>'+
+'<script>var P='+JSON.stringify(P)+';var LOGO="";<\/script>'+
+'<script>'+ DASH_JS +'<\/script></body></html>';
+  w.document.open(); w.document.write(html); w.document.close(); w.focus();
+}
+
+var DASH_JS = [
+"function q(id){return document.getElementById(id);}",
+"function esc(s){return String(s==null?'':s).replace(/[&<>\\\"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','\\\"':'&quot;'}[c];});}",
+"function pct(x){return x==null?null:Math.round(x*1000)/10;}",
+"function orColor(p){return p==null?'#cfd4da':(p>=85?'#0ca30c':(p>=60?'#e8930c':'#d03b3b'));}",
+"var state={marka:P.brands[0].kod,yil:null,rol:''},CH={};",
+"function bBrand(k){for(var i=0;i<P.brands.length;i++)if(P.brands[i].kod===k)return P.brands[i];return P.brands[0];}",
+"function yrs(){var s={};P.karneler.forEach(function(k){if(k.marka===state.marka)s[k.yil]=1;});var a=Object.keys(s).map(Number).sort(function(x,y){return y-x;});return a.length?a:[new Date().getFullYear()];}",
+"function KB(){return P.karneler.filter(function(k){return k.marka===state.marka&&k.yil===Number(state.yil);});}",
+"function kpi(cls,v,l,s){return '<div class=\"kpi '+cls+'\"><div class=\"l\">'+esc(l)+'</div><div class=\"v\">'+v+'</div><div class=\"s\">'+esc(s||'')+'</div></div>';}",
+"function destroyCharts(){Object.keys(CH).forEach(function(k){try{CH[k].destroy();}catch(e){}});CH={};}",
+"function build(){",
+"  var ys=yrs(); if(state.yil==null||ys.indexOf(Number(state.yil))<0)state.yil=ys[0];",
+"  var b=bBrand(state.marka);",
+"  if(!b.roller.length)state.rol=''; else if(!b.roller.some(function(r){return r.rol===state.rol;}))state.rol=b.roller[0].rol;",
+"  var kb=KB();",
+"  var dans={};kb.forEach(function(k){dans[k.danisman]=1;});",
+"  var kesin=kb.filter(function(k){return k.durum==='kesinlesen';}).length;",
+"  var orans=kb.map(function(k){return k.oran;}).filter(function(o){return o!=null;});",
+"  var avg=orans.length?pct(orans.reduce(function(s,o){return s+o;},0)/orans.length):null;",
+"  var yetTop=kb.reduce(function(s,k){return s+(k.yetersiz||0);},0);",
+"  var gbK={};kb.forEach(function(k){if(k.yetersiz>0)gbK[k.danisman]=1;});",
+"  var h='<div class=\"hd\"><div class=\"hd-in\">'+(LOGO?'<img class=\"logo\" src=\"'+LOGO+'\" alt=\"\">':'')+",
+"    '<div><h1>Performans Analitiği</h1><div class=\"sub\">Servis Danışmanı Karne Analizi · İnciroğlu Otomotiv</div></div>'+",
+"    '<div class=\"sp\"></div><label style=\"font-size:12px;color:#c3d1df;margin-right:6px\">Yıl</label>'+",
+"    '<select class=\"yr\" id=\"yr\">'+ys.map(function(y){return '<option value=\"'+y+'\"'+(Number(state.yil)===y?' selected':'')+'>'+y+'</option>';}).join('')+'</select>'+",
+"    '<button class=\"prn no-print\" id=\"prn\" style=\"margin-left:8px\">🖨 Yazdır</button></div></div>'+",
+"    '<div class=\"btabs\"><div class=\"btabs-in\" id=\"btabs\">'+P.brands.map(function(br){return '<button class=\"btab'+(br.kod===state.marka?' on':'')+'\" data-b=\"'+br.kod+'\">'+esc(br.ad)+'</button>';}).join('')+'</div></div><div class=\"acc\"></div>';",
+"  if(!kb.length){h+='<div class=\"wrap\"><div class=\"empty\">Bu marka ve yıl için karne verisi bulunmuyor.</div></div>';q('root').innerHTML=h;bind();return;}",
+"  h+='<div class=\"wrap\"><div class=\"kpis\">'+",
+"    kpi('b',Object.keys(dans).length,'Karneli Danışman',b.mudur||'—')+",
+"    kpi('g',kesin,'Kesinleşen Karne',kb.length+' karne girildi')+",
+"    kpi(avg==null?'b':(avg>=85?'ok':(avg>=60?'g':'bad')),(avg==null?'—':'%'+avg),'Ortalama Başarı','değerlendirilen metrik')+",
+"    kpi(yetTop?'bad':'ok',yetTop,'Yetersiz Metrik',Object.keys(gbK).length+' çalışan')+'</div>';",
+"  h+='<div class=\"grid\"><div class=\"card\"><div class=\"card-h\"><h3>Danışman Başarı Sıralaması</h3><span class=\"sub\">'+state.yil+' ortalaması</span></div><div class=\"card-b\"><div class=\"cw tall\"><canvas id=\"cDan\"></canvas></div></div></div>'+",
+"    '<div class=\"card\"><div class=\"card-h\"><h3>Aylık Ortalama Başarı</h3><span class=\"sub\">%</span></div><div class=\"card-b\"><div class=\"cw tall\"><canvas id=\"cTrend\"></canvas></div></div></div>'+",
+"    '<div class=\"card\"><div class=\"card-h\"><h3>Başarı Dağılımı</h3><span class=\"sub\">tüm metrikler</span></div><div class=\"card-b\"><div class=\"cw\"><canvas id=\"cDonut\"></canvas></div></div></div>'+",
+"    '<div class=\"card\"><div class=\"card-h\"><h3>Metrik Bazında Başarı</h3>'+(b.roller.length>1?'<div class=\"rtabs\" id=\"rtabs\">'+b.roller.map(function(r){return '<button class=\"rtab'+(r.rol===state.rol?' on':'')+'\" data-r=\"'+r.rol+'\">'+esc(r.ad)+'</button>';}).join('')+'</div>':'<span class=\"sub\">'+esc((b.roller[0]&&b.roller[0].ad)||'')+'</span>')+'</div><div class=\"card-b\"><div class=\"cw\"><canvas id=\"cMetrik\"></canvas></div></div></div></div>';",
+"  h+='<div class=\"foot\">Bu rapor '+new Date().toLocaleDateString('tr-TR')+' tarihinde oluşturulmuştur · İnciroğlu Otomotiv İnsan Kaynakları Direktörlüğü</div></div>';",
+"  q('root').innerHTML=h;destroyCharts();drawDan(kb);drawTrend();drawDonut(kb);drawMetrik(kb,b);bind();",
+"}",
+"function drawDan(kb){var g={};kb.forEach(function(k){if(k.oran==null)return;(g[k.danisman]=g[k.danisman]||[]).push(k.oran);});",
+"  var rows=Object.keys(g).map(function(d){var a=g[d];return {d:d,p:pct(a.reduce(function(s,o){return s+o;},0)/a.length)};}).sort(function(a,b){return b.p-a.p;});",
+"  if(!rows.length)return;CH.dan=new Chart(q('cDan'),{type:'bar',data:{labels:rows.map(function(r){return r.d;}),datasets:[{data:rows.map(function(r){return r.p;}),backgroundColor:rows.map(function(r){return orColor(r.p)+'d9';}),borderColor:rows.map(function(r){return orColor(r.p);}),borderWidth:1,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:false,tooltip:{callbacks:{label:function(c){return ' %'+c.raw+' başarı';}}}},scales:{x:{beginAtZero:true,max:100,grid:{color:'#e6e8ec'},ticks:{callback:function(v){return '%'+v;}}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});}",
+"function drawTrend(){var byM=[];for(var m=1;m<=12;m++){var arr=P.karneler.filter(function(k){return k.marka===state.marka&&k.yil===Number(state.yil)&&k.ay===m&&k.oran!=null;});byM.push(arr.length?pct(arr.reduce(function(s,k){return s+k.oran;},0)/arr.length):null);}",
+"  CH.trend=new Chart(q('cTrend'),{type:'line',data:{labels:P.aylar,datasets:[{data:byM,borderColor:'#16324e',backgroundColor:'rgba(22,50,78,.08)',fill:true,tension:.3,spanGaps:true,pointBackgroundColor:byM.map(function(p){return orColor(p);}),pointRadius:5,pointBorderColor:'#fff',pointBorderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw==null?'veri yok':' %'+c.raw;}}}},scales:{y:{beginAtZero:true,max:100,grid:{color:'#e6e8ec'},ticks:{callback:function(v){return '%'+v;}}},x:{grid:{display:false}}}}});}",
+"function drawDonut(kb){var bas=kb.reduce(function(s,k){return s+(k.basarili||0);},0),yet=kb.reduce(function(s,k){return s+(k.yetersiz||0);},0);",
+"  CH.donut=new Chart(q('cDonut'),{type:'doughnut',data:{labels:['Başarılı','Yetersiz'],datasets:[{data:[bas,yet],backgroundColor:['#0ca30c','#d03b3b'],borderColor:'#fff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:function(c){var t=bas+yet;return ' '+c.label+': '+c.raw+(t?' (%'+Math.round(c.raw/t*100)+')':'');}}}}}});}",
+"function drawMetrik(kb,b){var role=state.rol||(b.roller[0]&&b.roller[0].rol);var rdef=null;b.roller.forEach(function(r){if(r.rol===role)rdef=r;});if(!rdef){return;}",
+"  var kbr=kb.filter(function(k){return k.rol===role;}),labels=[],bas=[],yet=[];",
+"  rdef.metrikler.forEach(function(m){var b0=0,y0=0;kbr.forEach(function(k){var d=k.md[m.key];if(d==='Başarılı')b0++;else if(d==='Yetersiz')y0++;});if(b0+y0===0)return;labels.push(m.ad);bas.push(b0);yet.push(y0);});",
+"  if(!labels.length){CH.metrik=new Chart(q('cMetrik'),{type:'bar',data:{labels:['Veri yok'],datasets:[]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});return;}",
+"  CH.metrik=new Chart(q('cMetrik'),{type:'bar',data:{labels:labels,datasets:[{label:'Başarılı',data:bas,backgroundColor:'#0ca30cd9',borderRadius:4},{label:'Yetersiz',data:yet,backgroundColor:'#d03b3bd9',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10},maxRotation:45,minRotation:0}},y:{stacked:true,beginAtZero:true,grid:{color:'#e6e8ec'},ticks:{precision:0}}}}});}",
+"function bind(){var bt=q('btabs');if(bt)Array.prototype.forEach.call(bt.querySelectorAll('.btab'),function(x){x.onclick=function(){state.marka=x.getAttribute('data-b');state.rol='';build();};});",
+"  var yr=q('yr');if(yr)yr.onchange=function(){state.yil=Number(yr.value);build();};",
+"  var rt=q('rtabs');if(rt)Array.prototype.forEach.call(rt.querySelectorAll('.rtab'),function(x){x.onclick=function(){state.rol=x.getAttribute('data-r');build();};});",
+"  var pr=q('prn');if(pr)pr.onclick=function(){window.print();};}",
+"try{Chart.defaults.font.family=\"Inter,system-ui,sans-serif\";Chart.defaults.color='#52514e';}catch(e){}",
+"build();"
+].join('\n');
 
 /* ---------- YAZDIRMA PENCERESİ ---------- */
 function yazdirAc(html){
