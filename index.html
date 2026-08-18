@@ -909,6 +909,33 @@ function karneYaz(k){
   }
 }
 
+/* ---------- KAYIT SİLME (yalnız İK/admin) ---------- */
+function tebligSil(id){
+  TEBLIGLER=TEBLIGLER.filter(function(x){return x.id!==id;});
+  lsSet(LS.teblig,TEBLIGLER);
+  if(window.ServisFB&&window.ServisFB.delTeblig){
+    senkDurum('bekle');
+    window.ServisFB.delTeblig(id).then(function(){senkDurum('ok');})
+      .catch(function(e){senkDurum('err',e&&e.message);});
+  }
+}
+function karneSil(id){
+  KARNELER=KARNELER.filter(function(x){return x.id!==id;});
+  lsSet(LS.karne,KARNELER);
+  if(window.ServisFB&&window.ServisFB.delKarne){
+    senkDurum('bekle');
+    window.ServisFB.delKarne(id).then(function(){senkDurum('ok');})
+      .catch(function(e){senkDurum('err',e&&e.message);});
+  }
+}
+/* Geri bildirim = karneye bağlı süreç (imza tarihi + gelişim planı).
+   "Silmek" = bu iki alanı sıfırlar, karne kaydı korunur. */
+function geriBildirimSil(id){
+  var k=KARNELER.find(function(x){return x.id===id;}); if(!k)return;
+  k.gbTarihi=null; k.gelisimPlani='';
+  karneYaz(k);
+}
+
 /* ---------- FIRESTORE'DAN GELEN CANLI VERİ ---------- */
 window.servisVeriGeldi=function(payload){
   if(!payload)return;
@@ -1042,7 +1069,8 @@ function sekmeleriKur(){
   var t;
   if(SES.rol==='admin'){
     t=[['genel','Genel Bakış'],['teblig','1 · Hedef Tebliğ'],['karne','2 · Karne'],
-       ['gb','3 · Geri Bildirim'],['metrik','Metrik Yönetimi'],['kadro','Kadro & Kullanıcılar']];
+       ['gb','3 · Geri Bildirim'],['metrik','Metrik Yönetimi'],['kadro','Kadro & Kullanıcılar'],
+       ['yonetim','🗑 Kayıt Silme']];
   }else{
     t=[['teblig','1 · Hedef Tebliğ'],['karne','2 · Karne'],['gb','3 · Geri Bildirim']];
   }
@@ -1063,6 +1091,7 @@ function render(){
   else if(TAB==='gb')    html=viewGeriBildirim();
   else if(TAB==='metrik')html=viewMetrik();
   else if(TAB==='kadro') html=viewKadro();
+  else if(TAB==='yonetim')html=viewYonetim();
   v.innerHTML=html;
   baglaOlaylar();
 }
@@ -1874,6 +1903,75 @@ function viewGenel(){
 }
 
 /* ============================================================================
+   İK — KAYIT SİLME  (yalnız admin)
+   ========================================================================== */
+var YSEC={marka:'',yil:'',ay:''};
+function viewYonetim(){
+  if(SES.rol!=='admin')
+    return '<div class="card"><div class="card-b"><div class="empty"><b>Erişim yok</b>Bu alana yalnızca İnsan Kaynakları erişebilir.</div></div></div>';
+  var markalar=aktifMarkalar();
+  var yillar=[];for(var y=new Date().getFullYear()+1;y>=2025;y--)yillar.push(y);
+
+  function uygun(x){
+    if(YSEC.marka&&x.marka!==YSEC.marka)return false;
+    if(YSEC.yil&&Number(x.yil)!==Number(YSEC.yil))return false;
+    if(YSEC.ay&&Number(x.ay)!==Number(YSEC.ay))return false;
+    return true;
+  }
+  var tl=TEBLIGLER.filter(uygun).sort(function(a,b){return (b.yil*100+b.ay)-(a.yil*100+a.ay);});
+  var kl=KARNELER.filter(uygun).sort(function(a,b){return (b.yil*100+b.ay)-(a.yil*100+a.ay);});
+
+  var tRows=tl.map(function(t){
+    var dur=t.tebligEdildi?'<span class="badge b-ok">Tebliğ edildi</span>'
+      :(t.redMi?'<span class="badge b-bad">Alınmadı</span>'
+      :(t.ikGonderildi?'<span class="badge b-info">İK\'ya gönderildi</span>':'<span class="badge b-warn">Taslak</span>'));
+    return '<tr><td><b>'+esc(danGorunen(t.danisman,t.marka))+'</b><span class="mtr-not">'+esc(t.unvan||'')+'</span></td>'+
+      '<td>'+esc(markaAd(t.marka))+'</td>'+
+      '<td>'+esc(rolAd(t.rol))+'</td>'+
+      '<td>'+esc(AYLAR[t.ay-1])+' '+t.yil+'</td>'+
+      '<td>'+dur+'</td>'+
+      '<td class="num"><button class="btn-sm" data-tsil="'+esc(t.id)+'" style="color:var(--bad);border-color:#e7b7b7">🗑 Sil</button></td></tr>';
+  }).join('');
+
+  var kRows=kl.map(function(k){
+    var oz=karneOzet(k);
+    var dur=k.durum==='kesinlesen'?'<span class="badge b-ok">Kesinleşti</span>':'<span class="badge b-warn">Taslak</span>';
+    var gbVar=!!(k.gbTarihi||(k.gelisimPlani||'').trim());
+    return '<tr><td><b>'+esc(danGorunen(k.danisman,k.marka))+'</b><span class="mtr-not">'+esc(k.unvan||'')+'</span></td>'+
+      '<td>'+esc(markaAd(k.marka))+'</td>'+
+      '<td>'+esc(AYLAR[k.ay-1])+' '+k.yil+'</td>'+
+      '<td>'+dur+'</td>'+
+      '<td class="num">'+(oz.oran==null?'—':fmtYuzde(oz.oran))+(oz.yetersiz>0?' <span class="badge b-bad">'+oz.yetersiz+'</span>':'')+'</td>'+
+      '<td>'+(gbVar?'<button class="btn-sm" data-gbsil="'+esc(k.id)+'" title="İmza tarihi + gelişim planını sıfırla">↺ Geri Bildirimi Sil</button>':'<span style="color:var(--muted);font-size:11.5px">—</span>')+'</td>'+
+      '<td class="num"><button class="btn-sm" data-ksil="'+esc(k.id)+'" style="color:var(--bad);border-color:#e7b7b7">🗑 Sil</button></td></tr>';
+  }).join('');
+
+  return '<div class="note bad">⚠ Bu alan yalnız İnsan Kaynakları içindir. Silinen kayıt <b>geri alınamaz</b> ve tüm cihazlardan (bulut dâhil) kalkar. Gerekirse önce Genel Bakış → "💾 Tüm Veriyi Yedekle" ile yedek alın.</div>'+
+    '<div class="card"><div class="card-b"><div class="row">'+
+      '<div class="f"><label>Marka</label><select id="yMarka"><option value="">Tümü</option>'+
+        markalar.map(function(mk){return '<option value="'+mk.kod+'"'+(YSEC.marka===mk.kod?' selected':'')+'>'+esc(mk.ad)+'</option>';}).join('')+
+      '</select></div>'+
+      '<div class="f"><label>Yıl</label><select id="yYil"><option value="">Tümü</option>'+
+        yillar.map(function(v){return '<option value="'+v+'"'+(Number(YSEC.yil)===v?' selected':'')+'>'+v+'</option>';}).join('')+
+      '</select></div>'+
+      '<div class="f"><label>Ay</label><select id="yAy"><option value="">Tümü</option>'+
+        AYLAR.map(function(a,i){return '<option value="'+(i+1)+'"'+(Number(YSEC.ay)===i+1?' selected':'')+'>'+a+'</option>';}).join('')+
+      '</select></div>'+
+      '<div style="flex:1"></div>'+
+    '</div></div></div>'+
+
+    '<div class="card"><div class="card-h"><h3>Hedef Tebliğ Kayıtları</h3><span class="sub">'+tl.length+' kayıt</span></div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+    '<thead><tr><th>Çalışan</th><th>Marka</th><th>Karne Tipi</th><th>Dönem</th><th>Durum</th><th class="num">İşlem</th></tr></thead>'+
+    '<tbody>'+(tRows||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:18px">Bu filtreyle hedef tebliğ kaydı yok.</td></tr>')+'</tbody></table></div></div></div>'+
+
+    '<div class="card"><div class="card-h"><h3>Karne Kayıtları</h3><span class="sub">'+kl.length+' kayıt</span></div>'+
+    '<div class="card-b tight"><div class="tbl-wrap"><table class="tbl">'+
+    '<thead><tr><th>Çalışan</th><th>Marka</th><th>Dönem</th><th>Durum</th><th class="num">Başarı</th><th>Geri Bildirim</th><th class="num">İşlem</th></tr></thead>'+
+    '<tbody>'+(kRows||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:18px">Bu filtreyle karne kaydı yok.</td></tr>')+'</tbody></table></div></div></div>';
+}
+
+/* ============================================================================
    İK — METRİK YÖNETİMİ
    ========================================================================== */
 var MSEC={marka:'',rol:''};
@@ -2224,6 +2322,37 @@ function baglaOlaylar(){
     a.click(); toast('✓ Yedek indirildi.');
   });
 
+  /* ---------- KAYIT SİLME (yalnız admin) ---------- */
+  bagla('yMarka','onchange',function(e){YSEC.marka=e.target.value;render();});
+  bagla('yYil','onchange',function(e){YSEC.yil=e.target.value;render();});
+  bagla('yAy','onchange',function(e){YSEC.ay=e.target.value;render();});
+  baglaHepsi('[data-tsil]','onclick',function(e){
+    var id=e.dataset.tsil, t=TEBLIGLER.find(function(x){return x.id===id;}); if(!t)return;
+    modalAc('Hedef Tebliğini Sil',
+      '<div class="ov-who">'+esc(danGorunen(t.danisman,t.marka))+' · '+esc(markaAd(t.marka))+' · '+esc(AYLAR[t.ay-1])+' '+t.yil+'</div>'+
+      '<p>Bu hedef tebliğ kaydı kalıcı olarak silinecek. Bu işlem <b>geri alınamaz</b>.</p>',
+      [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
+       {ad:'Evet, Sil',cls:'btn danger',fn:function(){tebligSil(id);modalKapat();toast('✓ Hedef tebliğ silindi.');render();}}],true);
+  });
+  baglaHepsi('[data-ksil]','onclick',function(e){
+    var id=e.dataset.ksil, k=KARNELER.find(function(x){return x.id===id;}); if(!k)return;
+    var oz=karneOzet(k);
+    modalAc('Karneyi Sil',
+      '<div class="ov-who">'+esc(danGorunen(k.danisman,k.marka))+' · '+esc(markaAd(k.marka))+' · '+esc(AYLAR[k.ay-1])+' '+k.yil+'</div>'+
+      (k.durum==='kesinlesen'?'<div class="note warn">Bu karne <b>kesinleşmiş</b> bir kayıt; silinirse imza/çıktı geçmişi de kalkar.</div>':'')+
+      '<p>Karne'+(oz.yetersiz>0?' ve buna bağlı geri bildirim süreci':'')+' kalıcı olarak silinecek. Bu işlem <b>geri alınamaz</b>.</p>',
+      [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
+       {ad:'Evet, Sil',cls:'btn danger',fn:function(){karneSil(id);modalKapat();toast('✓ Karne silindi.');render();}}],true);
+  });
+  baglaHepsi('[data-gbsil]','onclick',function(e){
+    var id=e.dataset.gbsil, k=KARNELER.find(function(x){return x.id===id;}); if(!k)return;
+    modalAc('Geri Bildirimi Sil',
+      '<div class="ov-who">'+esc(danGorunen(k.danisman,k.marka))+' · '+esc(AYLAR[k.ay-1])+' '+k.yil+'</div>'+
+      '<p>Bu karnenin <b>geri bildirim imza tarihi ve gelişim planı</b> sıfırlanacak; karne kaydının kendisi korunur.</p>',
+      [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
+       {ad:'Evet, Sıfırla',cls:'btn danger',fn:function(){geriBildirimSil(id);modalKapat();toast('✓ Geri bildirim sıfırlandı.');render();}}],true);
+  });
+
   /* ---------- METRİK YÖNETİMİ ---------- */
   bagla('mMarka','onchange',function(e){MSEC.marka=e.target.value;MSEC.rol='';render();});
   bagla('mRol','onchange',function(e){MSEC.rol=e.target.value;render();});
@@ -2324,7 +2453,7 @@ function gbModal(k){
      ========================================================================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp }
+  import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -2355,7 +2484,9 @@ function gbModal(k){
       },
       pushKarne(k){
         return setDoc(doc(karneCol, k.id), Object.assign(temiz(k), {updatedAt: serverTimestamp()}), {merge:true});
-      }
+      },
+      delTeblig(id){ return deleteDoc(doc(tebligCol, id)); },
+      delKarne(id){ return deleteDoc(doc(karneCol, id)); }
     };
 
     const hata = (e) => { if (window.servisBaglantiHatasi) window.servisBaglantiHatasi(e && e.message); };
