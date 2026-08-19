@@ -2084,7 +2084,7 @@ function viewYonetim(){
       '<td>'+dur+'</td>'+
       '<td class="num">'+(oz.oran==null?'—':fmtYuzde(oz.oran))+(oz.yetersiz>0?' <span class="badge b-bad">'+oz.yetersiz+'</span>':'')+'</td>'+
       '<td>'+(gbVar?'<button class="btn-sm" data-gbsil="'+esc(k.id)+'" title="İmza tarihi + gelişim planını sıfırla">↺ Geri Bildirimi Sil</button>':'<span style="color:var(--muted);font-size:11.5px">—</span>')+'</td>'+
-      '<td class="num"><button class="btn-sm" data-ksil="'+esc(k.id)+'" style="color:var(--bad);border-color:#e7b7b7">🗑 Sil</button></td></tr>';
+      '<td class="num"><button class="btn-sm" data-karsil="'+esc(k.id)+'" style="color:var(--bad);border-color:#e7b7b7">🗑 Sil</button></td></tr>';
   }).join('');
 
   return '<div class="note bad">⚠ Bu alan yalnız İnsan Kaynakları içindir. Silinen kayıt <b>geri alınamaz</b> ve tüm cihazlardan (bulut dâhil) kalkar. Gerekirse önce Genel Bakış → "💾 Tüm Veriyi Yedekle" ile yedek alın.</div>'+
@@ -2475,8 +2475,8 @@ function baglaOlaylar(){
       [{ad:'Vazgeç',cls:'btn',fn:modalKapat},
        {ad:'Evet, Sil',cls:'btn danger',fn:function(){tebligSil(id);modalKapat();toast('✓ Hedef tebliğ silindi.');render();}}],true);
   });
-  baglaHepsi('[data-ksil]','onclick',function(e){
-    var id=e.dataset.ksil, k=KARNELER.find(function(x){return x.id===id;}); if(!k)return;
+  baglaHepsi('[data-karsil]','onclick',function(e){
+    var id=e.dataset.karsil, k=KARNELER.find(function(x){return x.id===id;}); if(!k)return;
     var oz=karneOzet(k);
     modalAc('Karneyi Sil',
       '<div class="ov-who">'+esc(danGorunen(k.danisman,k.marka))+' · '+esc(markaAd(k.marka))+' · '+esc(AYLAR[k.ay-1])+' '+k.yil+'</div>'+
